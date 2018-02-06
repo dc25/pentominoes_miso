@@ -1,42 +1,49 @@
-import Data.Map as DM 
+import Prelude (($), print, filter, length, fmap, concat, zipWith, fst, (==), (.), Char, Integer, return, (++), maximum, minimum, (+), (-), snd, Bool(False, True), Show, Eq, Ord)
 import Data.Set as DS 
 import Data.List (sort, nub)
 
 
 data Place = Location (Integer,Integer) | Name Char deriving (Show, Eq, Ord)
 
-type Piece = DS.Set Place
+type Piece = Set Place
 
 bounds :: Piece -> ((Integer, Integer), (Integer, Integer))
 bounds p = let locations = DS.filter (\pl -> case pl of
                                              Location coords -> True
                                              Name _ -> False) p
-               coords = fmap (\(Location (row, col)) -> (row,col)) $ DS.toList locations
+               coords = fmap (\(Location (row, col)) -> (row,col)) $ toList locations
                rows = fmap fst coords
                cols = fmap snd coords
            in ((minimum rows, minimum cols), (maximum rows, maximum cols))
 
+translateLocation :: (Integer, Integer) -> Place -> Place
 translateLocation (vshift, hshift) loc =
     case loc of
         Location (row, col) -> Location (row+vshift, col+hshift)
         _ -> loc
 
+rotateLocation :: Place -> Place
 rotateLocation loc =
     case loc of
         Location (row, col) -> Location (col, -row)
         _ -> loc
 
+flipLocation :: Place -> Place
 flipLocation loc =
     case loc of
         Location (row, col) -> Location (col, row)
         _ -> loc
 
-translatePiece p shift = DS.map (translateLocation shift) p
+translatePiece :: Piece -> (Integer, Integer) -> Piece
+translatePiece p shift = map (translateLocation shift) p
 
-rotatePiece p = DS.map rotateLocation p
+rotatePiece :: Piece -> Piece
+rotatePiece p = map rotateLocation p
 
-flipPiece p = DS.map flipLocation p
+flipPiece :: Piece -> Piece
+flipPiece p = map flipLocation p
 
+translations :: Set Place -> Piece -> [(Integer, Integer)]
 translations board p = do 
     let ((minRow, minCol),(maxRow, maxCol)) = bounds p
         ((minRowBoard, minColBoard),(maxRowBoard, maxColBoard)) = bounds board
@@ -60,7 +67,7 @@ fullPlacements board p0 =
     in nub placementsWithDuplicates
 
 board :: Set Place
-board = DS.fromList $ fmap Name names ++ do
+board = fromList $ fmap Name names ++ do
     row <- [0..9]
     col <- [0..5]
     return $ Location (row, col)
@@ -72,19 +79,19 @@ image = [ ['I', 'P', 'P', 'Y', 'Y', 'Y', 'Y', 'V', 'V', 'V']
         , ['I', 'T', 'W', 'W', 'N', 'N', 'F', 'Z', 'Z', 'U']
         , ['T', 'T', 'T', 'W', 'W', 'N', 'N', 'N', 'U', 'U'] ]
 
-indexed :: Map (Integer, Integer) Char
-indexed = DM.fromList $ concat $ fmap (\(row, ns) -> zipWith (\col c -> ((row,col),c)) [0..] ns) (zipWith (,) [0..] image)
+indexed :: [((Integer, Integer), Char)]
+indexed = concat $ fmap (\(row, ns) -> zipWith (\col c -> ((row,col),c)) [0..] ns) (zipWith (,) [0..] image)
 
-names = nub $ fmap snd $ DM.toList indexed
+names = nub $ concat image
 
 pieces :: [Piece]
-pieces = fmap (\n -> DS.fromList $ (Name n) : (fmap (Location . fst) $ DM.toList $ DM.filter (==n) indexed)) names
+pieces = fmap (\n -> fromList $ (Name n) : (fmap (Location . fst) $ Prelude.filter (\((r,c),name) -> name==n) indexed)) names
 
 allPlacements = concat $ fmap (fullPlacements board) pieces
 
 solve board placements =
-    -- DS.findMin $ DS.map  (\loc -> (length $ Prelude.filter (DS.member loc) placements, loc) ) board
-    sort $ DS.toList $ DS.map  (\loc -> (length $ Prelude.filter (DS.member loc) placements, loc) ) board
+    let spot = findMin $ map  (\loc -> (length $ Prelude.filter (member loc) placements, loc) ) board
+    in spot
 
 main = print $ solve board allPlacements
 
