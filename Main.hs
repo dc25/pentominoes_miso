@@ -1,6 +1,7 @@
 import Data.Map as DM 
 import Data.Set as DS 
-import Data.List (nub)
+import Data.List (sort, nub)
+
 
 data Place = Location (Integer,Integer) | Name Char deriving (Show, Eq, Ord)
 
@@ -39,10 +40,8 @@ flipPiece p = DS.map flipLocation p
 translations board p = do 
     let ((minRow, minCol),(maxRow, maxCol)) = bounds p
         ((minRowBoard, minColBoard),(maxRowBoard, maxColBoard)) = bounds board
-        height = maxRow-minRow+1
-        width = maxCol-minCol+1
-    vt <- [minRowBoard-minRow-height..maxRowBoard+1]
-    ht <- [minColBoard-minCol-width..maxColBoard+1]
+    vt <- [minRowBoard-maxRow..maxRowBoard-minRow]
+    ht <- [minColBoard-maxCol..maxColBoard-minCol]
     return (vt, ht)
 
 placements board p = Prelude.filter (`isSubsetOf` board) (fmap (translatePiece p) (translations board p))
@@ -84,7 +83,8 @@ pieces = fmap (\n -> DS.fromList $ (Name n) : (fmap (Location . fst) $ DM.toList
 allPlacements = concat $ fmap (fullPlacements board) pieces
 
 solve board placements =
-    DS.findMin $ DS.map  (\loc -> (length $ Prelude.filter (DS.member loc) placements, loc) ) board
+    -- DS.findMin $ DS.map  (\loc -> (length $ Prelude.filter (DS.member loc) placements, loc) ) board
+    sort $ DS.toList $ DS.map  (\loc -> (length $ Prelude.filter (DS.member loc) placements, loc) ) board
 
 main = print $ solve board allPlacements
 
