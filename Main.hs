@@ -62,9 +62,17 @@ fullPlacements board p0 =
         r1 = flipPiece p1
         r2 = flipPiece p2
         r3 = flipPiece p3
+
         placementsWithDuplicates 
-           =  (placements board p0) ++ (placements board p1) ++ (placements board p2) ++ (placements board p3) 
-           ++ (placements board r0) ++ (placements board r1) ++ (placements board r2) ++ (placements board r3) 
+           =  (placements board p0) 
+           ++ (placements board p1) 
+           ++ (placements board p2) 
+           ++ (placements board p3) 
+           ++ (placements board r0) 
+           ++ (placements board r1) 
+           ++ (placements board r2) 
+           ++ (placements board r3) 
+
     in nub placementsWithDuplicates
 
 board :: Set Place
@@ -104,7 +112,5 @@ solve board placements =
 
 main = do 
            let solutions = solve board allPlacements
-           print $ head solutions
-           print $ head $ tail solutions
-           forM_ (take 10 solutions) $ print 
+           print $ length solutions 
 
