@@ -109,30 +109,24 @@ pick (board, placements) = do
         p <- toList $ DS.filter (member $ snd spot) placements
         return (p, (board \\ p, DS.filter (null.(intersection p)) placements))
 
+solve :: (Set Place, Set Piece) -> [ [Piece] ]
+solve (board, placements) =
+    if null board then return []   -- solved!
+    else do
+        (p, (nextBoard, nextPlacements)) <- pick (board, placements)
+        subsol <- solve (nextBoard, nextPlacements)
+        return (p:subsol)
+
 pickStateT :: StateT (Set Place, Set Piece) [] Piece
 pickStateT = StateT pick
 
 solveStateT :: StateT (Set Place, Set Piece) [] [Piece]
 solveStateT = do
-        (board,_) <- get
-        if null board then return []
-        else do
-            p <- pickStateT
-            subsol <- solveStateT
-            return (p:subsol)
-
-
-solve :: (Set Place, Set Piece) -> [ [Piece] ]
-solve (board, placements) =
-    if null board then return []   -- solved!
+    (board,_) <- get
+    if null board then return []
     else do
-        let spot = findMin $ map  (\loc -> (length $ DS.filter (member loc) placements, loc) ) board
-        guard (fst spot > 0)  -- nothing goes here; failed
-        let onSpot = toList $ DS.filter (member $ snd spot) placements
-        p <- onSpot
-        let nextBoard = board \\ p
-            nextPlacements = DS.filter (null.(intersection p)) placements
-        subsol <- solve (nextBoard, nextPlacements)
+        p <- pickStateT
+        subsol <- solveStateT
         return (p:subsol)
 
 main = do 
