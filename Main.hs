@@ -1,6 +1,7 @@
-import Prelude (($), print, filter, length, fmap, concat, zipWith, fst, (==), (.), Char, Integer, return, (++), maximum, minimum, (+), (-), snd, Bool(False, True), Show, Eq, Ord)
-import Data.Set as DS 
+import Prelude (($), print, filter, length, fmap, concat, zipWith, fst, (==), (.), Char, Integer, return, (++), maximum, minimum, (+), (-), snd, Bool(False, True), Show, Eq, Ord, not, head, tail, reverse, take, (>))
+import Data.Set as DS
 import Data.List (sort, nub)
+import Control.Monad
 
 
 data Place = Location (Integer,Integer) | Name Char deriving (Show, Eq, Ord)
@@ -87,11 +88,23 @@ names = nub $ concat image
 pieces :: [Piece]
 pieces = fmap (\n -> fromList $ (Name n) : (fmap (Location . fst) $ Prelude.filter (\((r,c),name) -> name==n) indexed)) names
 
-allPlacements = concat $ fmap (fullPlacements board) pieces
+allPlacements :: Set Piece
+allPlacements = fromList $ concat $ fmap (fullPlacements board) pieces
 
-solve board placements =
-    let spot = findMin $ map  (\loc -> (length $ Prelude.filter (member loc) placements, loc) ) board
-    in spot
+solve :: Set Place -> Set Piece -> [ [Piece] ]
+solve board placements = 
+    if null board then return []   -- solved!
+    else do 
+          let spot = findMin $ map  (\loc -> (length $ DS.filter (member loc) placements, loc) ) board
+          guard (fst spot > 0)  -- nothing goes here; failed
+          let onSpot = DS.filter (member $ snd spot) placements
+          p <- toList onSpot
+          subsol <- solve (board \\ p) (DS.filter (null.(intersection p)) placements) 
+          return (p:subsol)
 
-main = print $ solve board allPlacements
+main = do 
+           let solutions = solve board allPlacements
+           print $ head solutions
+           print $ head $ tail solutions
+           forM_ (take 10 solutions) $ print 
 
