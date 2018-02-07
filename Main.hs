@@ -1,14 +1,17 @@
-import Prelude (($), print, filter, length, fmap, concat, zipWith, fst, (==), (.), Char, Integer, return, (++), maximum, minimum, (+), (-), snd, Bool(False, True), Show, Eq, Ord, not, head, tail, reverse, take, (>))
+{-# Language ScopedTypeVariables #-}
+
+import Prelude (($), print, filter, length, fmap, concat, zipWith, fst, (==), (.), Char, Int, return, (++), maximum, minimum, (+), (-), snd, Bool(False, True), Show, Eq, Ord, not, head, tail, reverse, take, (>))
 import Data.Set as DS
 import Data.List (sort, nub)
 import Control.Monad
+import Control.Monad.Trans.State
 
 
-data Place = Location (Integer,Integer) | Name Char deriving (Show, Eq, Ord)
+data Place = Location (Int,Int) | Name Char deriving (Show, Eq, Ord)
 
 type Piece = Set Place
 
-bounds :: Piece -> ((Integer, Integer), (Integer, Integer))
+bounds :: Piece -> ((Int, Int), (Int, Int))
 bounds p = let locations = DS.filter (\pl -> case pl of
                                              Location coords -> True
                                              Name _ -> False) p
@@ -17,7 +20,7 @@ bounds p = let locations = DS.filter (\pl -> case pl of
                cols = fmap snd coords
            in ((minimum rows, minimum cols), (maximum rows, maximum cols))
 
-translateLocation :: (Integer, Integer) -> Place -> Place
+translateLocation :: (Int, Int) -> Place -> Place
 translateLocation (vshift, hshift) loc =
     case loc of
         Location (row, col) -> Location (row+vshift, col+hshift)
@@ -35,7 +38,7 @@ flipLocation loc =
         Location (row, col) -> Location (col, row)
         _ -> loc
 
-translatePiece :: Piece -> (Integer, Integer) -> Piece
+translatePiece :: Piece -> (Int, Int) -> Piece
 translatePiece p shift = map (translateLocation shift) p
 
 rotatePiece :: Piece -> Piece
@@ -44,7 +47,7 @@ rotatePiece p = map rotateLocation p
 flipPiece :: Piece -> Piece
 flipPiece p = map flipLocation p
 
-translations :: Set Place -> Piece -> [(Integer, Integer)]
+translations :: Set Place -> Piece -> [(Int, Int)]
 translations board p = do 
     let ((minRow, minCol),(maxRow, maxCol)) = bounds p
         ((minRowBoard, minColBoard),(maxRowBoard, maxColBoard)) = bounds board
@@ -88,7 +91,7 @@ image = [ ['I', 'P', 'P', 'Y', 'Y', 'Y', 'Y', 'V', 'V', 'V']
         , ['I', 'T', 'W', 'W', 'N', 'N', 'F', 'Z', 'Z', 'U']
         , ['T', 'T', 'T', 'W', 'W', 'N', 'N', 'N', 'U', 'U'] ]
 
-indexed :: [((Integer, Integer), Char)]
+indexed :: [((Int, Int), Char)]
 indexed = concat $ fmap (\(row, ns) -> zipWith (\col c -> ((row,col),c)) [0..] ns) (zipWith (,) [0..] image)
 
 names = nub $ concat image
@@ -99,18 +102,40 @@ pieces = fmap (\n -> fromList $ (Name n) : (fmap (Location . fst) $ Prelude.filt
 allPlacements :: Set Piece
 allPlacements = fromList $ concat $ fmap (fullPlacements board) pieces
 
-solve :: Set Place -> Set Piece -> [ [Piece] ]
-solve board placements = 
+pick :: (Set Place, Set Piece) -> [(Piece, (Set Place, Set Piece))]
+pick (board, placements) = do
+        let spot = findMin $ map  (\loc -> (length $ DS.filter (member loc) placements, loc) ) board
+        guard (fst spot > 0)  -- nothing goes here; failed
+        p <- toList $ DS.filter (member $ snd spot) placements
+        return (p, (board \\ p, DS.filter (null.(intersection p)) placements))
+
+pickStateT :: StateT (Set Place, Set Piece) [] Piece
+pickStateT = StateT pick
+
+solveStateT :: StateT (Set Place, Set Piece) [] [Piece]
+solveStateT = do
+        (board,_) <- get
+        if null board then return []
+        else do
+            p <- pickStateT
+            subsol <- solveStateT
+            return (p:subsol)
+
+
+solve :: (Set Place, Set Piece) -> [ [Piece] ]
+solve (board, placements) =
     if null board then return []   -- solved!
-    else do 
-          let spot = findMin $ map  (\loc -> (length $ DS.filter (member loc) placements, loc) ) board
-          guard (fst spot > 0)  -- nothing goes here; failed
-          let onSpot = DS.filter (member $ snd spot) placements
-          p <- toList onSpot
-          subsol <- solve (board \\ p) (DS.filter (null.(intersection p)) placements) 
-          return (p:subsol)
+    else do
+        let spot = findMin $ map  (\loc -> (length $ DS.filter (member loc) placements, loc) ) board
+        guard (fst spot > 0)  -- nothing goes here; failed
+        let onSpot = toList $ DS.filter (member $ snd spot) placements
+        p <- onSpot
+        let nextBoard = board \\ p
+            nextPlacements = DS.filter (null.(intersection p)) placements
+        subsol <- solve (nextBoard, nextPlacements)
+        return (p:subsol)
 
 main = do 
-           let solutions = solve board allPlacements
+           let solutions = runStateT solveStateT (board, allPlacements)
            print $ length solutions 
 
