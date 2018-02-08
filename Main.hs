@@ -133,8 +133,8 @@ pop :: [[a]] -> [[a]]
 pop xss =
     let ta = tail xss
     in case (head xss) of 
-           t0:t1:ts -> (t1:ts):ta
-           t0:ts -> ta
+           _:t1:ts -> (t1:ts):ta
+           t0:_ -> ta
     
 
 back :: State ([[(Piece, (Set Place, Set Piece))]]) [Piece]
