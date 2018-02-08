@@ -131,9 +131,12 @@ solveStateT = do
 
 pop :: [[a]] -> [[a]]
 pop xss =
-    case (head xss) of 
-         t0:[] -> tail xss
-         _:ts -> ts:tail xss
+    case xss of
+        x:xs -> case (x) of 
+                    [] -> xs -- should not happen;  how better to handle this?
+                    t0:[] -> xs
+                    _:ts -> ts:xs
+        [] -> []-- should not happen
     
 
 back :: State ([[(Piece, (Set Place, Set Piece))]]) [Piece]
