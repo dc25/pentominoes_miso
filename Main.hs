@@ -2,7 +2,7 @@
 
 import Prelude (($), print, filter, length, fmap, concat, zipWith, fst, (==), (.), Char, Int, return, (++), maximum, minimum, (+), (-), snd, Bool(False, True), Show, Eq, Ord, not, head, tail, reverse, take, (>))
 import Data.Set as DS
-import Data.List (sort, nub)
+import Data.List as DL (sort, nub)
 import Control.Monad
 import Control.Monad.Trans.State
 
@@ -128,6 +128,34 @@ solveStateT = do
         p <- pickStateT
         subsol <- solveStateT
         return (p:subsol)
+
+pop :: [[a]] -> [[a]]
+pop xss =
+    let ta = tail xss
+    in case (head xss) of 
+           t0:t1:ts -> (t1:ts):ta
+           t0:ts -> ta
+    
+
+back :: State ([[(Piece, (Set Place, Set Piece))]]) [Piece]
+back = do
+    optionStack :: ([[(Piece, (Set Place, Set Piece))]]) <- get
+    let newOptions = pop optionStack
+    put newOptions
+    return $ fmap (fst.head) newOptions
+
+step :: State ([[(Piece, (Set Place, Set Piece))]]) [Piece]
+step = do
+    optionStack <- get
+    let (_,(board,placements )) = head $ head optionStack
+    if null board then back
+    else do
+        let p = pick (board,placements)
+        if p == [] then back
+        else do
+            let newOptions = p:optionStack
+            put newOptions
+            return $ fmap (fst.head) newOptions
 
 main = do 
            let solutions = runStateT solveStateT (board, allPlacements)
