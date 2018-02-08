@@ -131,10 +131,9 @@ solveStateT = do
 
 pop :: [[a]] -> [[a]]
 pop xss =
-    let ta = tail xss
-    in case (head xss) of 
-           _:t1:ts -> (t1:ts):ta
-           t0:_ -> ta
+    case (head xss) of 
+         t0:[] -> tail xss
+         _:ts -> ts:tail xss
     
 
 back :: State ([[(Piece, (Set Place, Set Piece))]]) [Piece]
