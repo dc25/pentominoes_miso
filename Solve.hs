@@ -1,4 +1,4 @@
-module Solve (Place(Name, Location), Piece, solveStateT, allPlacements, nextOpenSpot, step) where
+module Solve (Place(Name, Location), Piece, solveStateT, allPlacements, nextMoves, step) where
 
 import Data.Set as DS
 import Data.List as DL (sort, nub, repeat)
@@ -8,6 +8,8 @@ import Control.Monad.Trans.State
 data Place = Location (Int,Int) | Name Char deriving (Show, Eq, Ord)
 
 type Piece = Set Place
+type Board = Set Place
+type Puzzle = (Board, Set Piece)
 
 bounds :: Piece -> ((Int, Int), (Int, Int))
 bounds p = let locations = DS.filter (\pl -> case pl of
@@ -79,27 +81,27 @@ fullPlacements board p0 =
 allPlacements :: [Piece] -> Set Place -> Set Piece
 allPlacements pieces board = fromList $ concat $ fmap (fullPlacements board) pieces
 
-nextOpenSpot :: (Set Place, Set Piece) -> [(Piece, (Set Place, Set Piece))]
-nextOpenSpot (board, placements) = do
+nextMoves :: Puzzle -> [(Piece, Puzzle)]
+nextMoves (board, placements) = do
         let spot = findMin $ DS.map  (\loc -> (length $ DS.filter (member loc) placements, loc) ) board
         guard (fst spot > 0)  -- nothing goes here; failed
         ns <- toList $ DS.filter (member $ snd spot) placements
         return (ns, (board \\ ns, DS.filter (DS.null.(intersection ns)) placements))
 
-solve :: (Set Place, Set Piece) -> [ [Piece] ]
+solve :: Puzzle -> [ [Piece] ]
 solve (board, placements) =
     if DS.null board then return []   -- solved!
     else do
-        (ns, (nextBoard, nextPlacements)) <- nextOpenSpot (board, placements)
+        (ns, (nextBoard, nextPlacements)) <- nextMoves (board, placements)
         subsol <- solve (nextBoard, nextPlacements)
         return (ns:subsol)
 
-solveStateT :: StateT (Set Place, Set Piece) [] [Piece]
+solveStateT :: StateT Puzzle [] [Piece]
 solveStateT = do
     (board,_) <- get
     if DS.null board then return []
     else do
-        ns <- StateT nextOpenSpot
+        ns <- StateT nextMoves
         subsol <- solveStateT
         return (ns:subsol)
 
@@ -110,14 +112,14 @@ pop2 xss =
         (_:ts):xs -> ts:xs
         _ -> xss -- should not happen
     
-step :: State ([[(Piece, (Set Place, Set Piece))]]) [Piece]
+step :: State ([[(Piece, Puzzle)]]) [Piece]
 step = do
     optionStack <- get
     let (_,(board,placements )) = head $ head optionStack
     if DS.null board then 
         put $ pop2 optionStack
     else do
-        let ns = nextOpenSpot (board,placements)
+        let ns = nextMoves (board,placements)
         if ns == [] then 
             put $ pop2 optionStack
         else 
