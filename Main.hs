@@ -1,8 +1,6 @@
-{-# Language ScopedTypeVariables #-}
-
 import Prelude (($), print, filter, length, fmap, concat, zipWith, fst, (==), (.), Char, Int, return, (++), maximum, minimum, (+), (-), snd, Bool(False, True), Show, Eq, Ord, not, head, tail, reverse, take, (>))
 import Data.Set as DS
-import Data.List as DL (sort, nub)
+import Data.List as DL (sort, nub, repeat)
 import Control.Monad
 import Control.Monad.Trans.State
 
@@ -78,88 +76,77 @@ fullPlacements board p0 =
 
     in nub placementsWithDuplicates
 
-board :: Set Place
-board = fromList $ fmap Name names ++ do
-    row <- [0..9]
-    col <- [0..5]
-    return $ Location (row, col)
+allPlacements :: [Piece] -> Set Place -> Set Piece
+allPlacements pieces board = fromList $ concat $ fmap (fullPlacements board) pieces
 
-image = [ ['I', 'P', 'P', 'Y', 'Y', 'Y', 'Y', 'V', 'V', 'V']
-        , ['I', 'P', 'P', 'X', 'Y', 'L', 'L', 'L', 'L', 'V']
-        , ['I', 'P', 'X', 'X', 'X', 'F', 'Z', 'Z', 'L', 'V']
-        , ['I', 'T', 'W', 'X', 'F', 'F', 'F', 'Z', 'U', 'U']
-        , ['I', 'T', 'W', 'W', 'N', 'N', 'F', 'Z', 'Z', 'U']
-        , ['T', 'T', 'T', 'W', 'W', 'N', 'N', 'N', 'U', 'U'] ]
-
-indexed :: [((Int, Int), Char)]
-indexed = concat $ fmap (\(row, ns) -> zipWith (\col c -> ((row,col),c)) [0..] ns) (zipWith (,) [0..] image)
-
-names = nub $ concat image
-
-pieces :: [Piece]
-pieces = fmap (\n -> fromList $ (Name n) : (fmap (Location . fst) $ Prelude.filter (\((r,c),name) -> name==n) indexed)) names
-
-allPlacements :: Set Piece
-allPlacements = fromList $ concat $ fmap (fullPlacements board) pieces
-
-pick :: (Set Place, Set Piece) -> [(Piece, (Set Place, Set Piece))]
-pick (board, placements) = do
+nextOpenSpot :: (Set Place, Set Piece) -> [(Piece, (Set Place, Set Piece))]
+nextOpenSpot (board, placements) = do
         let spot = findMin $ map  (\loc -> (length $ DS.filter (member loc) placements, loc) ) board
         guard (fst spot > 0)  -- nothing goes here; failed
-        p <- toList $ DS.filter (member $ snd spot) placements
-        return (p, (board \\ p, DS.filter (null.(intersection p)) placements))
+        ns <- toList $ DS.filter (member $ snd spot) placements
+        return (ns, (board \\ ns, DS.filter (null.(intersection ns)) placements))
 
 solve :: (Set Place, Set Piece) -> [ [Piece] ]
 solve (board, placements) =
     if null board then return []   -- solved!
     else do
-        (p, (nextBoard, nextPlacements)) <- pick (board, placements)
+        (ns, (nextBoard, nextPlacements)) <- nextOpenSpot (board, placements)
         subsol <- solve (nextBoard, nextPlacements)
-        return (p:subsol)
-
-pickStateT :: StateT (Set Place, Set Piece) [] Piece
-pickStateT = StateT pick
+        return (ns:subsol)
 
 solveStateT :: StateT (Set Place, Set Piece) [] [Piece]
 solveStateT = do
     (board,_) <- get
     if null board then return []
     else do
-        p <- pickStateT
+        ns <- StateT nextOpenSpot
         subsol <- solveStateT
-        return (p:subsol)
+        return (ns:subsol)
 
-pop :: [[a]] -> [[a]]
-pop xss =
+pop2 :: [[a]] -> [[a]]
+pop2 xss =
     case xss of
-        x:xs -> case (x) of 
-                    [] -> xs -- should not happen;  how better to handle this?
-                    t0:[] -> xs
-                    _:ts -> ts:xs
-        [] -> []-- should not happen
+        (_:[]):xs -> pop2 xs 
+        (_:ts):xs -> ts:xs
+        _ -> xss -- should not happen
     
-
-back :: State ([[(Piece, (Set Place, Set Piece))]]) [Piece]
-back = do
-    optionStack :: ([[(Piece, (Set Place, Set Piece))]]) <- get
-    let newOptions = pop optionStack
-    put newOptions
-    return $ fmap (fst.head) newOptions
-
 step :: State ([[(Piece, (Set Place, Set Piece))]]) [Piece]
 step = do
     optionStack <- get
     let (_,(board,placements )) = head $ head optionStack
-    if null board then back
+    if null board then 
+        put $ pop2 optionStack
     else do
-        let p = pick (board,placements)
-        if p == [] then back
-        else do
-            let newOptions = p:optionStack
-            put newOptions
-            return $ fmap (fst.head) newOptions
+        let ns = nextOpenSpot (board,placements)
+        if ns == [] then 
+            put $ pop2 optionStack
+        else 
+            put $ ns:optionStack
+    newOptions <- get 
+    return $ fmap (fst.head) newOptions
 
 main = do 
-           let solutions = runStateT solveStateT (board, allPlacements)
-           print $ length solutions 
+    let fullBoard = fromList $ fmap Name names ++ [Location (row, col) | row <- [0..9], col <- [0..5]]
+
+        image = [ ['I', 'P', 'P', 'Y', 'Y', 'Y', 'Y', 'V', 'V', 'V']
+                , ['I', 'P', 'P', 'X', 'Y', 'L', 'L', 'L', 'L', 'V']
+                , ['I', 'P', 'X', 'X', 'X', 'F', 'Z', 'Z', 'L', 'V']
+                , ['I', 'T', 'W', 'X', 'F', 'F', 'F', 'Z', 'U', 'U']
+                , ['I', 'T', 'W', 'W', 'N', 'N', 'F', 'Z', 'Z', 'U']
+                , ['T', 'T', 'T', 'W', 'W', 'N', 'N', 'N', 'U', 'U'] ]
+
+        indexed = concat $ fmap (\(row, ns) -> zipWith (\col c -> ((row,col),c)) [0..] ns) (zipWith (,) [0..] image)
+
+        names = nub $ concat image
+
+        pieces :: [Piece]
+        pieces = fmap (\n -> fromList $ (Name n) : (fmap (Location . fst) $ Prelude.filter (\((r,c),name) -> name==n) indexed)) names
+
+
+        solutions = runStateT solveStateT (fullBoard, allPlacements pieces fullBoard)
+
+        initialState = [nextOpenSpot (fullBoard, allPlacements pieces fullBoard)]
+        steps = sequence $ repeat step
+        results = evalState steps initialState
+    mapM_ print $ (take 5000) results 
 
