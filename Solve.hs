@@ -1,9 +1,9 @@
-module Solve (Place(Name, Location), Piece, solveStateT, allPlacements, nextMoves, step) where
+module Solve (step0, step) where
 
 import Data.Set as DS
 import Data.List as DL (sort, nub, repeat)
 import Control.Monad
-import Control.Monad.Trans.State
+import Control.Monad.State
 
 data Place = Location (Int,Int) | Name Char deriving (Show, Eq, Ord)
 
@@ -88,23 +88,6 @@ nextMoves (board, placements) = do
         ns <- toList $ DS.filter (member $ snd spot) placements
         return (ns, (board \\ ns, DS.filter (DS.null.(intersection ns)) placements))
 
-solve :: Puzzle -> [ [Piece] ]
-solve (board, placements) =
-    if DS.null board then return []   -- solved!
-    else do
-        (ns, (nextBoard, nextPlacements)) <- nextMoves (board, placements)
-        subsol <- solve (nextBoard, nextPlacements)
-        return (ns:subsol)
-
-solveStateT :: StateT Puzzle [] [Piece]
-solveStateT = do
-    (board,_) <- get
-    if DS.null board then return []
-    else do
-        ns <- StateT nextMoves
-        subsol <- solveStateT
-        return (ns:subsol)
-
 pop2 :: [[a]] -> [[a]]
 pop2 xss =
     case xss of
@@ -126,3 +109,18 @@ step = do
             put $ ns:optionStack
     newOptions <- get 
     return $ fmap (fst.head) newOptions
+
+step0 :: [(Int,Int)] -> [[Char]] -> State ([[(Piece, Puzzle)]]) [Piece]
+step0 squares image = do
+    let indexed = concat $ fmap (\(row, ns) -> zipWith (\col c -> ((row,col),c)) [0..] ns) (zipWith (,) [0..] image)
+
+        names = nub $ concat image
+
+        pieces = fmap (\n -> fromList $ (Name n) : (fmap (Location . fst) $ Prelude.filter (\((r,c),name) -> name==n) indexed)) names
+
+        board = fromList $ fmap Name names ++ fmap Location squares
+
+        placements = allPlacements pieces board
+        ns = [nextMoves (board, placements)]
+    put ns
+    return $ fmap (fst.head) ns
