@@ -1,4 +1,4 @@
-module Solve (Progress, Piece, Layout, step0, step, getName, getLocations) where
+module Solve (Progress, Piece, Layout(..), step0, step, getName, getLocations) where
 
 import Data.Set as DS
 import Data.List as DL (sort, nub, repeat)
@@ -10,7 +10,7 @@ data Place = Location (Int,Int) | Name Char deriving (Show, Eq, Ord)
 type Piece = Set Place
 type Board = Set Place
 type Puzzle = (Board, Set Piece)
-type Layout = [Piece]
+data Layout = Complete [Piece] | Incomplete [Piece] deriving (Show, Eq)
 type Progress = [[(Piece, Puzzle)]]
 
 
@@ -98,29 +98,13 @@ nextMoves (board, placements) = do
         ns <- toList $ DS.filter (member $ snd spot) placements
         return (ns, (board \\ ns, DS.filter (DS.null.(intersection ns)) placements))
 
-pop2 :: [[a]] -> [[a]]
-pop2 xss =
-    case xss of
-        (_:[]):xs -> pop2 xs 
-        (_:ts):xs -> ts:xs
-        _ -> xss -- should not happen
-    
-step :: State (Progress) [Piece]
+step :: State Progress Layout
 step = do
     optionStack <- get
     let (_,(board,placements )) = head $ head optionStack
-    if DS.null board then 
-        put $ pop2 optionStack
-    else do
-        let ns = nextMoves (board,placements)
-        if ns == [] then 
-            put $ pop2 optionStack
-        else 
-            put $ ns:optionStack
-    newOptions <- get 
-    return $ fmap (fst.head) newOptions
+    finishStep optionStack board placements
 
-step0 :: [(Int,Int)] -> [[Char]] -> State ([[(Piece, Puzzle)]]) [Piece]
+step0 :: [(Int,Int)] -> [[Char]] -> State Progress Layout
 step0 squares image = do
     let indexed = concat $ fmap (\(row, ns) -> zipWith (\col c -> ((row,col),c)) [0..] ns) (zipWith (,) [0..] image)
 
@@ -131,9 +115,32 @@ step0 squares image = do
         board = fromList $ fmap Name names ++ fmap Location squares
 
         placements = allPlacements pieces board
-        ns = [nextMoves (board, placements)]
-    put ns
-    return $ fmap (fst.head) ns
+    finishStep [] board placements
+
+finishStep :: Progress -> Board -> Set Piece -> State Progress Layout
+finishStep optionStack board placements = do
+    if DS.null board then 
+        put $ pop2 optionStack
+    else do
+        let ns = nextMoves (board,placements)
+        if ns == [] then 
+            put $ pop2 optionStack
+        else 
+            put $ ns:optionStack
+    newOptions <- get 
+    let newPieces = fmap (fst.head) newOptions
+        newBoard = (fst.snd.head.head) newOptions
+        newLayout = if DS.null newBoard 
+                 then Complete newPieces
+                 else Incomplete newPieces
+    return newLayout
+
+pop2 :: [[a]] -> [[a]]
+pop2 xss =
+    case xss of
+        (_:[]):xs -> pop2 xs 
+        (_:ts):xs -> ts:xs
+        _ -> xss -- should not happen
 
 getName :: Piece -> Char
 getName p = let Name ch = head $ toList $ DS.filter isName p

@@ -18,7 +18,7 @@ data Action
 data Model = Model
   { time :: Double
   , progress :: S.Progress
-  , layout :: [S.Piece]
+  , layout :: S.Layout
   , w :: Int
   , h :: Int
   } deriving (Show, Eq)
@@ -28,7 +28,7 @@ initialModel =
   Model
   { time = 0
   , progress = [] :: S.Progress
-  , layout = [] :: S.Layout
+  , layout = S.Incomplete [] :: S.Layout
   , w = 0
   , h = 0
   }
@@ -75,26 +75,26 @@ updateModel (Time newTime) model@Model {..} = newModel <# (Time <$> now)
     (newLayout,newProgress) = runState S.step progress
     newModel = model { time = newTime 
                      , progress = newProgress
-                     ,layout=newLayout
+                     , layout = newLayout
                      }
-
-viewModel :: Model -> View Action
-viewModel x = div_ [] [ viewGame x ]
 
 cellSize :: Int
 cellSize = 20
 
-viewGame :: Model -> View Action
-viewGame model@Model {..} =
-          div_
-              []
-              [ MS.svg_
-                    [ MS.version_ "1.1"
-                    , width_ (ms $ show (w * cellSize))
-                    , height_ (ms $ show (h * cellSize))
-                    ]
-                    (Prelude.concatMap showPiece layout)
-              ]
+viewModel :: Model -> View Action
+viewModel model@Model {..} =
+  div_
+      []
+      [ MS.svg_
+          [ MS.version_ "1.1"
+          , width_ (ms $ show (w * cellSize))
+          , height_ (ms $ show (h * cellSize))
+          ]
+          (Prelude.concatMap showPiece pieces)
+      ]
+  where pieces = case layout of
+                     S.Complete p -> p
+                     S.Incomplete p -> p
 
 showPiece :: S.Piece -> [View Action]
 showPiece p = 
