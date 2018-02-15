@@ -10,9 +10,13 @@ import Data.Map as DM
 
 import qualified Solve as S 
 
+data Action
+  = Init Double
+  | Time Double
+  deriving (Show, Eq)
+
 data Model = Model
   { time :: Double
-  , delta :: Double
   , progress :: S.Progress
   , layout :: [S.Piece]
   , w :: Int
@@ -23,7 +27,6 @@ initialModel :: Model
 initialModel =
   Model
   { time = 0
-  , delta = 0
   , progress = [] :: S.Progress
   , layout = [] :: S.Layout
   , w = 0
@@ -53,7 +56,7 @@ updateModel (Init newTime) model@Model {..} = newModel <# (Time <$> now)
              , ['I', 'T', 'W', 'W', 'N', 'N', 'F', 'Z', 'Z', 'U']
              , ['T', 'T', 'T', 'W', 'W', 'N', 'N', 'N', 'U', 'U'] ]
 
-    board = [(row, col) | row <- [0..9], col <- [0..5]]
+    board = [(row, col) | row <- [0..11], col <- [0..4]]
 
     newW = 1 + (maximum $ fmap snd board)
     newH = 1 + (maximum $ fmap fst board)
@@ -71,15 +74,9 @@ updateModel (Time newTime) model@Model {..} = newModel <# (Time <$> now)
     newDelta = newTime - time 
     (newLayout,newProgress) = runState S.step progress
     newModel = model { time = newTime 
-                     , delta = newDelta
                      , progress = newProgress
                      ,layout=newLayout
                      }
-
-data Action
-  = Init Double
-  | Time Double
-  deriving (Show, Eq)
 
 viewModel :: Model -> View Action
 viewModel x = div_ [] [ viewGame x ]
@@ -99,26 +96,11 @@ viewGame model@Model {..} =
                     (Prelude.concatMap showPiece layout)
               ]
 
-showSquare :: String -> View Action
-showSquare color =
-    MS.rect_
-        [ MS.x_ "0.05"
-        , MS.y_ "0.05"
-        , MS.width_ "0.9"
-        , MS.height_ "0.9"
-        , style_ $ fromList [("fill", ms color)]
-        ]
-        []
-
-showCell :: String -> (Int, Int) -> View Action
-showCell color pos =
-    let (row, col) = pos
-        scale = show cellSize
-    in MS.g_ [ MS.transform_
-                (ms $    "scale (" ++ scale ++ ", " ++ scale ++ ") " 
-                      ++ "translate (" ++ show col ++ ", " ++ show row ++ ") ")
-          ]
-          [showSquare color] 
+showPiece :: S.Piece -> [View Action]
+showPiece p = 
+   let name = S.getName p
+       locations = S.getLocations p
+   in fmap (showCell (getColor name)) locations
 
 colorMap :: Map Char String
 colorMap = fromList [ ('F', "green")
@@ -141,8 +123,20 @@ getColor name =
     Just color -> color
     Nothing -> "black"  -- should not happen.
 
-showPiece :: S.Piece -> [View Action]
-showPiece p = 
-   let name = S.getName p
-       locations = S.getLocations p
-   in fmap (showCell (getColor name)) locations
+showCell :: String -> (Int, Int) -> View Action
+showCell color (row,col) =
+    MS.g_ [ MS.transform_
+                (ms $    "scale (" ++ scale ++ ", " ++ scale ++ ") " 
+                      ++ "translate (" ++ show col ++ ", " ++ show row ++ ") ")
+          ]
+          [ MS.rect_
+                [ MS.x_ "0.05"
+                , MS.y_ "0.05"
+                , MS.width_ "0.9"
+                , MS.height_ "0.9"
+                , style_ $ fromList [("fill", ms color)]
+                ]
+                []
+          ] 
+    where scale = show cellSize
+
