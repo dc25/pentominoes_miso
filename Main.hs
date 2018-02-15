@@ -35,19 +35,20 @@ initialModel =
 
 main :: IO ()
 main = do
-  t <- now
-  startApp App { model = initialModel
-               , initialAction = Init t
-               , update = updateModel
-               , view   = viewModel
-               , events = defaultEvents
-               , mountPoint = Nothing
-               , subs   = []
-               }
+  t <- Miso.now
+  Miso.startApp Miso.App 
+    { model = initialModel
+    , initialAction = Init t
+    , update = updateModel
+    , view   = viewModel
+    , events = Miso.defaultEvents
+    , mountPoint = Nothing
+    , subs   = []
+    }
 
-updateModel :: Action -> Model -> Effect Action Model
+updateModel :: Action -> Model -> Miso.Effect Action Model
 
-updateModel (Init newTime) model@Model {..} = newModel <# (Time <$> now)
+updateModel (Init newTime) model@Model {..} = newModel <# (Time <$> Miso.now)
   where
     pieces = [ ['I', 'P', 'P', 'Y', 'Y', 'Y', 'Y', 'V', 'V', 'V']
              , ['I', 'P', 'P', 'X', 'Y', 'L', 'L', 'L', 'L', 'V']
@@ -69,7 +70,7 @@ updateModel (Init newTime) model@Model {..} = newModel <# (Time <$> now)
                      , h = newH
                      }
 
-updateModel (Time newTime) model@Model {..} = newModel <# (Time <$> now)
+updateModel (Time newTime) model@Model {..} = newModel <# (Time <$> Miso.now)
   where
     newDelta = newTime - time 
     (newLayout,newProgress) = runState S.step progress
@@ -81,14 +82,14 @@ updateModel (Time newTime) model@Model {..} = newModel <# (Time <$> now)
 cellSize :: Int
 cellSize = 20
 
-viewModel :: Model -> View Action
+viewModel :: Model -> Miso.View Action
 viewModel model@Model {..} =
-  div_
+  Miso.div_
       []
       [ MS.svg_
           [ MS.version_ "1.1"
-          , width_ (ms $ show (w * cellSize))
-          , height_ (ms $ show (h * cellSize))
+          , MS.width_ (ms $ show (w * cellSize))
+          , MS.height_ (ms $ show (h * cellSize))
           ]
           (Prelude.concatMap showPiece pieces)
       ]
@@ -96,7 +97,7 @@ viewModel model@Model {..} =
                      S.Complete p -> p
                      S.Incomplete p -> p
 
-showPiece :: S.Piece -> [View Action]
+showPiece :: S.Piece -> [Miso.View Action]
 showPiece p = 
    let name = S.getName p
        locations = S.getLocations p
@@ -123,7 +124,7 @@ getColor name =
     Just color -> color
     Nothing -> "black"  -- should not happen.
 
-showCell :: String -> (Int, Int) -> View Action
+showCell :: String -> (Int, Int) -> Miso.View Action
 showCell color (row,col) =
     MS.g_ [ MS.transform_
                 (ms $    "scale (" ++ scale ++ ", " ++ scale ++ ") " 
@@ -134,7 +135,7 @@ showCell color (row,col) =
                 , MS.y_ "0.05"
                 , MS.width_ "0.9"
                 , MS.height_ "0.9"
-                , style_ $ fromList [("fill", ms color)]
+                , Miso.style_ $ fromList [("fill", ms color)]
                 ]
                 []
           ] 
