@@ -6,7 +6,7 @@ import Miso
 import Miso.String hiding (maximum)
 import qualified Miso.Svg as MS (g_, style_, width_, height_, transform_, x_, y_, rect_, svg_, version_)
 import Control.Monad.State
-import Data.Map
+import Data.Map as DM
 
 import qualified Solve as S 
 
@@ -99,29 +99,50 @@ viewGame model@Model {..} =
                     (Prelude.concatMap showPiece layout)
               ]
 
-showSquare :: (Int,Int) -> View Action
-showSquare (row, col) =
+showSquare :: String -> View Action
+showSquare color =
     MS.rect_
         [ MS.x_ "0.05"
         , MS.y_ "0.05"
         , MS.width_ "0.9"
         , MS.height_ "0.9"
-        , style_ $ fromList [("fill", "red")]
+        , style_ $ fromList [("fill", ms color)]
         ]
         []
 
-showCell :: (Int, Int) -> View Action
-showCell pos =
+showCell :: String -> (Int, Int) -> View Action
+showCell color pos =
     let (row, col) = pos
         scale = show cellSize
     in MS.g_ [ MS.transform_
                 (ms $    "scale (" ++ scale ++ ", " ++ scale ++ ") " 
                       ++ "translate (" ++ show col ++ ", " ++ show row ++ ") ")
           ]
-          [showSquare pos] 
+          [showSquare color] 
+
+colorMap :: Map Char String
+colorMap = fromList [ ('F', "green")
+                    , ('I', "blue")
+                    , ('L', "red")
+                    , ('N', "yellow")
+                    , ('P', "purple")
+                    , ('T', "brown")
+                    , ('U', "maroon")
+                    , ('V', "cyan")
+                    , ('W', "pink")
+                    , ('X', "orange")
+                    , ('Y', "indigo")
+                    , ('Z', "topaz")
+                    ]
+
+getColor :: Char -> String
+getColor name = 
+  case DM.lookup name colorMap of
+    Just color -> color
+    Nothing -> "black"  -- should not happen.
 
 showPiece :: S.Piece -> [View Action]
 showPiece p = 
    let name = S.getName p
        locations = S.getLocations p
-   in fmap showCell locations
+   in fmap (showCell (getColor name)) locations
