@@ -1,4 +1,4 @@
-module Solve (step0, step) where
+module Solve (Progress, Piece, Layout, step0, step, getName, getLocations) where
 
 import Data.Set as DS
 import Data.List as DL (sort, nub, repeat)
@@ -10,11 +10,21 @@ data Place = Location (Int,Int) | Name Char deriving (Show, Eq, Ord)
 type Piece = Set Place
 type Board = Set Place
 type Puzzle = (Board, Set Piece)
+type Layout = [Piece]
+type Progress = [[(Piece, Puzzle)]]
+
+
+isLocation :: Place -> Bool
+isLocation pl  = 
+  case pl of
+    Location coords -> True
+    Name _ -> False
+
+isName :: Place -> Bool
+isName = not.isLocation
 
 bounds :: Piece -> ((Int, Int), (Int, Int))
-bounds p = let locations = DS.filter (\pl -> case pl of
-                                             Location coords -> True
-                                             Name _ -> False) p
+bounds p = let locations = DS.filter isLocation p
                coords = fmap (\(Location (row, col)) -> (row,col)) $ toList locations
                rows = fmap fst coords
                cols = fmap snd coords
@@ -95,7 +105,7 @@ pop2 xss =
         (_:ts):xs -> ts:xs
         _ -> xss -- should not happen
     
-step :: State ([[(Piece, Puzzle)]]) [Piece]
+step :: State (Progress) [Piece]
 step = do
     optionStack <- get
     let (_,(board,placements )) = head $ head optionStack
@@ -124,3 +134,15 @@ step0 squares image = do
         ns = [nextMoves (board, placements)]
     put ns
     return $ fmap (fst.head) ns
+
+getName :: Piece -> Char
+getName p = let Name ch = head $ toList $ DS.filter isName p
+            in ch
+
+getLocation :: Place -> (Int, Int)
+getLocation pl = let Location lo = pl
+                 in lo
+
+getLocations :: Piece -> [(Int,Int)]
+getLocations = fmap getLocation . toList . DS.filter isLocation 
+
