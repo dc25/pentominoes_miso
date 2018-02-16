@@ -3,8 +3,8 @@
 module Main where
 
 import Miso 
-import Miso.String hiding (maximum)
-import qualified Miso.Svg as MS (g_, style_, width_, height_, transform_, x_, y_, rect_, svg_, version_)
+import qualified Miso.String as MST (ms)
+import qualified Miso.Svg as MSV (g_, style_, width_, height_, transform_, x_, y_, rect_, svg_, version_)
 import Control.Monad.State
 import Data.Map as DM
 
@@ -94,17 +94,19 @@ viewModel :: Model -> Miso.View Action
 viewModel model@Model {..} =
   Miso.div_
       []
-      (viewLayout cellSize w h layout : fmap (viewLayout (cellSize `div` 2) w h) (Prelude.reverse solutions) )
+      (viewLayout cellSize w h layout : fmap (viewLayout (2*cellSize `div` 3) w h) (Prelude.reverse solutions) )
   where cellSize = 30
 
 viewLayout :: Int -> Int -> Int -> S.Layout -> Miso.View Action
 viewLayout cellSize width height layout =
-  MS.svg_
-    [ MS.version_ "1.1"
-    , MS.width_ (ms $ show (width * cellSize))
-    , MS.height_ (ms $ show (height * cellSize))
-    ]
-    (Prelude.concatMap (showPiece cellSize) pieces)
+  div_ [class_ "svg-container"]
+       [ MSV.svg_
+           [ MSV.version_ "1.1"
+           , MSV.width_ (MST.ms $ show (width * cellSize))
+           , MSV.height_ (MST.ms $ show (height * cellSize))
+           ]
+           (Prelude.concatMap (showPiece cellSize) pieces)
+       ]
   where pieces = case layout of
                      S.Complete p -> p
                      S.Incomplete p -> p
@@ -117,16 +119,16 @@ showPiece cellSize p =
 
 showCell :: Int -> String -> (Int, Int) -> Miso.View Action
 showCell cellSize color (row,col) =
-    MS.g_ [ MS.transform_
-                (ms $    "scale (" ++ scale ++ ", " ++ scale ++ ") " 
-                      ++ "translate (" ++ show col ++ ", " ++ show row ++ ") ")
+    MSV.g_ [ MSV.transform_
+                (MST.ms $    "scale (" ++ scale ++ ", " ++ scale ++ ") " 
+                          ++ "translate (" ++ show col ++ ", " ++ show row ++ ") ")
           ]
-          [ MS.rect_
-                [ MS.x_ "0.05"
-                , MS.y_ "0.05"
-                , MS.width_ "0.9"
-                , MS.height_ "0.9"
-                , Miso.style_ $ fromList [("fill", ms color)]
+          [ MSV.rect_
+                [ MSV.x_ "0.05"
+                , MSV.y_ "0.05"
+                , MSV.width_ "0.9"
+                , MSV.height_ "0.9"
+                , Miso.style_ $ fromList [("fill", MST.ms color)]
                 ]
                 []
           ] 
