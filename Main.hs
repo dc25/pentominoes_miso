@@ -13,7 +13,11 @@ import qualified Solve as S
 data Action
   = Init Double
   | Time Double
+  | SetRate Rate
+  | RequestStep
   deriving (Show, Eq)
+
+data Rate = Fast | Slow | Step deriving (Show, Eq)
 
 data Model = Model
   { time :: Double
@@ -22,6 +26,8 @@ data Model = Model
   , solutions :: [S.Layout]
   , w :: Int
   , h :: Int
+  , rate :: Rate
+  , stepRequested :: Bool
   } deriving (Show, Eq)
 
 main :: IO ()
@@ -33,6 +39,8 @@ main = do
                        , solutions = []
                        , w = 0
                        , h = 0
+                       , rate = Step
+                       , stepRequested = False
                        }
   t <- Miso.now
   Miso.startApp Miso.App 
@@ -46,6 +54,10 @@ main = do
     }
 
 updateModel :: Action -> Model -> Miso.Effect Action Model
+
+updateModel (SetRate newRate) model = noEff (model {rate=newRate})
+
+updateModel RequestStep model = noEff (model {stepRequested=True})
 
 updateModel (Init newTime) model@Model {..} = newModel <# (Time <$> Miso.now)
   where
@@ -94,8 +106,23 @@ viewModel :: Model -> Miso.View Action
 viewModel model@Model {..} =
   Miso.div_
       []
-      (viewLayout cellSize w h layout : fmap (viewLayout (2*cellSize `div` 3) w h) (Prelude.reverse solutions) )
-  where cellSize = 30
+      ( viewControls rate
+      : viewLayout workCellSize w h layout 
+      : fmap (viewLayout solutionCellSize w h) 
+             (Prelude.reverse solutions) 
+      )
+  where workCellSize = 30
+        solutionCellSize = ((workCellSize * 2)`div` 3)
+
+viewControls :: Rate -> Miso.View Action
+viewControls rate = 
+  div_ 
+    []
+    ([ input_ [type_ "radio", name_ "updateRate", checked_ (rate==Fast), onClick (SetRate Fast)] [], text "Fast"
+    , input_ [type_ "radio", name_ "updateRate", checked_ (rate==Slow), onClick (SetRate Slow)] [], text "Slow"
+    , input_ [type_ "radio", name_ "updateRate", checked_ (rate==Step), onClick (SetRate Step)] [], text "Step"
+    ] ++ if (rate==Step) then [button_ [onClick RequestStep] [text "Step"]] else[])
+
 
 viewLayout :: Int -> Int -> Int -> S.Layout -> Miso.View Action
 viewLayout cellSize width height layout =
