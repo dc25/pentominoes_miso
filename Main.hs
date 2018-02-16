@@ -19,6 +19,7 @@ data Model = Model
   { time :: Double
   , progress :: S.Progress
   , layout :: S.Layout
+  , solutions :: [S.Layout]
   , w :: Int
   , h :: Int
   } deriving (Show, Eq)
@@ -29,18 +30,20 @@ initialModel =
   { time = 0
   , progress = [] :: S.Progress
   , layout = S.Incomplete [] :: S.Layout
+  , solutions = []
   , w = 0
   , h = 0
   }
 
 main :: IO ()
 main = do
+  let cellSize = 30
   t <- Miso.now
   Miso.startApp Miso.App 
     { model = initialModel
     , initialAction = Init t
     , update = updateModel
-    , view   = viewModel
+    , view   = viewModel cellSize
     , events = Miso.defaultEvents
     , mountPoint = Nothing
     , subs   = []
@@ -63,9 +66,15 @@ updateModel (Init newTime) model@Model {..} = newModel <# (Time <$> Miso.now)
     newH = 1 + (maximum $ fmap fst board)
 
     (newLayout,newProgress) = runState (S.step0 board pieces) progress
+
+    newSolutions = case newLayout of
+                       S.Complete _ -> newLayout:solutions
+                       S.Incomplete _ -> solutions
+
     newModel = model { time = newTime
                      , progress = newProgress
                      , layout = newLayout
+                     , solutions = newSolutions
                      , w = newW
                      , h = newH
                      }
@@ -74,34 +83,40 @@ updateModel (Time newTime) model@Model {..} = newModel <# (Time <$> Miso.now)
   where
     newDelta = newTime - time 
     (newLayout,newProgress) = runState S.step progress
+
+    newSolutions = case newLayout of
+                       S.Complete _ -> newLayout:solutions
+                       S.Incomplete _ -> solutions
+
     newModel = model { time = newTime 
                      , progress = newProgress
+                     , solutions = newSolutions
                      , layout = newLayout
                      }
 
-cellSize :: Int
-cellSize = 20
-
-viewModel :: Model -> Miso.View Action
-viewModel model@Model {..} =
+viewModel :: Int -> Model -> Miso.View Action
+viewModel cellSize model@Model {..} =
   Miso.div_
       []
-      [ MS.svg_
-          [ MS.version_ "1.1"
-          , MS.width_ (ms $ show (w * cellSize))
-          , MS.height_ (ms $ show (h * cellSize))
-          ]
-          (Prelude.concatMap showPiece pieces)
-      ]
+      (viewLayout cellSize w h layout : fmap (viewLayout (cellSize `div` 2) w h) (Prelude.reverse solutions) )
+
+viewLayout :: Int -> Int -> Int -> S.Layout -> Miso.View Action
+viewLayout cellSize width height layout =
+  MS.svg_
+    [ MS.version_ "1.1"
+    , MS.width_ (ms $ show (width * cellSize))
+    , MS.height_ (ms $ show (height * cellSize))
+    ]
+    (Prelude.concatMap (showPiece cellSize) pieces)
   where pieces = case layout of
                      S.Complete p -> p
                      S.Incomplete p -> p
 
-showPiece :: S.Piece -> [Miso.View Action]
-showPiece p = 
+showPiece :: Int -> S.Piece -> [Miso.View Action]
+showPiece cellSize p = 
    let name = S.getName p
        locations = S.getLocations p
-   in fmap (showCell (getColor name)) locations
+   in fmap (showCell cellSize (getColor name)) locations
 
 colorMap :: Map Char String
 colorMap = fromList [ ('F', "green")
@@ -114,8 +129,8 @@ colorMap = fromList [ ('F', "green")
                     , ('V', "cyan")
                     , ('W', "pink")
                     , ('X', "orange")
-                    , ('Y', "indigo")
-                    , ('Z', "topaz")
+                    , ('Y', "navy")
+                    , ('Z', "lime")
                     ]
 
 getColor :: Char -> String
@@ -124,8 +139,8 @@ getColor name =
     Just color -> color
     Nothing -> "black"  -- should not happen.
 
-showCell :: String -> (Int, Int) -> Miso.View Action
-showCell color (row,col) =
+showCell :: Int -> String -> (Int, Int) -> Miso.View Action
+showCell cellSize color (row,col) =
     MS.g_ [ MS.transform_
                 (ms $    "scale (" ++ scale ++ ", " ++ scale ++ ") " 
                       ++ "translate (" ++ show col ++ ", " ++ show row ++ ") ")
