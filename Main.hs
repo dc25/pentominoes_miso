@@ -24,26 +24,22 @@ data Model = Model
   , h :: Int
   } deriving (Show, Eq)
 
-initialModel :: Model
-initialModel =
-  Model
-  { time = 0
-  , progress = [] :: S.Progress
-  , layout = S.Incomplete [] :: S.Layout
-  , solutions = []
-  , w = 0
-  , h = 0
-  }
-
 main :: IO ()
 main = do
-  let cellSize = 30
+  let initialModel = Model 
+                       { time = 0
+                       , progress = [] 
+                       , layout = S.Incomplete [] 
+                       , solutions = []
+                       , w = 0
+                       , h = 0
+                       }
   t <- Miso.now
   Miso.startApp Miso.App 
     { model = initialModel
     , initialAction = Init t
     , update = updateModel
-    , view   = viewModel cellSize
+    , view   = viewModel 
     , events = Miso.defaultEvents
     , mountPoint = Nothing
     , subs   = []
@@ -94,11 +90,12 @@ updateModel (Time newTime) model@Model {..} = newModel <# (Time <$> Miso.now)
                      , layout = newLayout
                      }
 
-viewModel :: Int -> Model -> Miso.View Action
-viewModel cellSize model@Model {..} =
+viewModel :: Model -> Miso.View Action
+viewModel model@Model {..} =
   Miso.div_
       []
       (viewLayout cellSize w h layout : fmap (viewLayout (cellSize `div` 2) w h) (Prelude.reverse solutions) )
+  where cellSize = 30
 
 viewLayout :: Int -> Int -> Int -> S.Layout -> Miso.View Action
 viewLayout cellSize width height layout =
@@ -118,27 +115,6 @@ showPiece cellSize p =
        locations = S.getLocations p
    in fmap (showCell cellSize (getColor name)) locations
 
-colorMap :: Map Char String
-colorMap = fromList [ ('F', "green")
-                    , ('I', "blue")
-                    , ('L', "red")
-                    , ('N', "yellow")
-                    , ('P', "purple")
-                    , ('T', "brown")
-                    , ('U', "maroon")
-                    , ('V', "cyan")
-                    , ('W', "pink")
-                    , ('X', "orange")
-                    , ('Y', "navy")
-                    , ('Z', "lime")
-                    ]
-
-getColor :: Char -> String
-getColor name = 
-  case DM.lookup name colorMap of
-    Just color -> color
-    Nothing -> "black"  -- should not happen.
-
 showCell :: Int -> String -> (Int, Int) -> Miso.View Action
 showCell cellSize color (row,col) =
     MS.g_ [ MS.transform_
@@ -155,4 +131,23 @@ showCell cellSize color (row,col) =
                 []
           ] 
     where scale = show cellSize
+
+getColor :: Char -> String
+getColor name = 
+  let colorMap = fromList [ ('F', "green")
+                          , ('I', "blue")
+                          , ('L', "red")
+                          , ('N', "yellow")
+                          , ('P', "purple")
+                          , ('T', "brown")
+                          , ('U', "maroon")
+                          , ('V', "cyan")
+                          , ('W', "pink")
+                          , ('X', "orange")
+                          , ('Y', "navy")
+                          , ('Z', "lime")
+                          ]
+  in case DM.lookup name colorMap of
+       Just color -> color
+       Nothing -> "black"  -- should not happen.
 
