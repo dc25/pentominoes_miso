@@ -1,0 +1,160 @@
+code size summary per package:
+
+AHOOhHjGLItBYmDB2lAxxO:  826
+DfpZFnZR7Sa7Y07uHwVn10:  10227
+KQpEOkJjX9qJTwsO87bqLg:  208766
+Kf2mIYnZNzX8FVHpQOsI2V:  9806
+aeson_D4zMF1P1ZpsKMgz9HPiZU6:20900
+base:                    490231
+ghc-prim:                39861
+ghcjs_7HDZUYLWu6O9tXZr0Fsvpn:22048
+integer-gmp:             24088
+main:                    102164
+miso_Ke37ggrzxfxLj8QGrtVejE:95895
+mtl_CckdaCYdd9aDpmVp4fMiiy:1542
+scien_4m62Psf9729KUEAP4gkY8C:4919
+text_DfPPBlezQfj0WJcyB3QXey:1951
+unord_34NWiEgrMCw8NUnSnAxkhV:3821
+vecto_DY6msUvqg3iJ5Ak1gSL0h2:2041
+
+
+code size per module:
+
+AHOOhHjGLItBYmDB2lAxxO
+    Control.DeepSeq:                    826
+
+DfpZFnZR7Sa7Y07uHwVn10
+    GHCJS.Prim:                         5800
+    GHCJS.Prim.Internal:                4427
+
+KQpEOkJjX9qJTwsO87bqLg
+    Data.Map.Base:                      55948
+    Data.Sequence:                      37067
+    Data.Set.Base:                      115751
+
+Kf2mIYnZNzX8FVHpQOsI2V
+    Control.Monad.Trans.State.Lazy:     9806
+
+aeson_D4zMF1P1ZpsKMgz9HPiZU6
+    Data.Aeson.Types.Instances:         4376
+    Data.Aeson.Types.Internal:          16524
+
+base
+    Control.Exception.Base:             6010
+    Control.Monad:                      505
+    Data.Either:                        397
+    Data.Foldable:                      4789
+    Data.Functor:                       108
+    Data.Functor.Identity:              1125
+    Data.Maybe:                         1025
+    Data.OldList:                       2095
+    Data.Tuple:                         334
+    Data.Typeable:                      885
+    Data.Typeable.Internal:             1418
+    Foreign.C.Error:                    9812
+    Foreign.Marshal.Alloc:              375
+    Foreign.Marshal.Array:              2038
+    Foreign.Storable:                   2680
+    GHC.Arr:                            3667
+    GHC.Base:                           16251
+    GHC.Conc.Sync:                      7822
+    GHC.Enum:                           10262
+    GHC.Err:                            218
+    GHC.Exception:                      6644
+    GHC.Float:                          128005
+    GHC.Float.ConversionUtils:          3383
+    GHC.Foreign:                        12136
+    GHC.ForeignPtr:                     1265
+    GHC.IO:                             3605
+    GHC.IO.Buffer:                      1276
+    GHC.IO.BufferedIO:                  864
+    GHC.IO.Device:                      1297
+    GHC.IO.Encoding:                    1030
+    GHC.IO.Encoding.Failure:            724
+    GHC.IO.Encoding.Types:              1032
+    GHC.IO.Encoding.UTF8:               61149
+    GHC.IO.Exception:                   19322
+    GHC.IO.FD:                          37215
+    GHC.IO.Handle:                      416
+    GHC.IO.Handle.FD:                   6981
+    GHC.IO.Handle.Internals:            27136
+    GHC.IO.Handle.Types:                3571
+    GHC.IORef:                          166
+    GHC.Int:                            802
+    GHC.List:                           18425
+    GHC.MVar:                           188
+    GHC.Num:                            3347
+    GHC.Ptr:                            188
+    GHC.Real:                           23789
+    GHC.ST:                             186
+    GHC.STRef:                          194
+    GHC.Show:                           26177
+    GHC.Storable:                       1084
+    GHC.TopHandler:                     10349
+    GHC.Word:                           350
+    System.Posix.Internals:             16119
+
+ghc-prim
+    GHC.CString:                        4537
+    GHC.Classes:                        33160
+    GHC.IntWord64:                      146
+    GHC.Tuple:                          802
+    GHC.Types:                          1216
+
+ghcjs_7HDZUYLWu6O9tXZr0Fsvpn
+    Data.JSString:                      10204
+    Data.JSString.Internal.Type:        244
+    GHCJS.Foreign.Internal:             366
+    GHCJS.Internal.Types:               233
+    GHCJS.Marshal:                      8542
+    GHCJS.Marshal.Internal:             1099
+    GHCJS.Marshal.Pure:                 392
+    JavaScript.Web.AnimationFrame:      968
+
+integer-gmp
+    GHC.Integer.GMP.Prim:               333
+    GHC.Integer.Type:                   23755
+
+main
+    Main:                               57026
+    Solve:                              45138
+
+miso_Ke37ggrzxfxLj8QGrtVejE
+    Miso:                               17609
+    Miso.Delegate:                      1247
+    Miso.Diff:                          2623
+    Miso.Effect:                        748
+    Miso.Event.Decoder:                 929
+    Miso.Event.Types:                   21843
+    Miso.FFI:                           10822
+    Miso.Html.Element:                  2659
+    Miso.Html.Event:                    1016
+    Miso.Html.Internal:                 26734
+    Miso.Html.Property:                 2029
+    Miso.String:                        679
+    Miso.Svg.Attribute:                 4060
+    Miso.Svg.Element:                   2595
+    Miso.Types:                         302
+
+mtl_CckdaCYdd9aDpmVp4fMiiy
+    Control.Monad.State.Class:          1542
+
+scien_4m62Psf9729KUEAP4gkY8C
+    Data.Scientific:                    4919
+
+text_DfPPBlezQfj0WJcyB3QXey
+    Data.Text.Array:                    697
+    Data.Text.Internal:                 1254
+
+unord_34NWiEgrMCw8NUnSnAxkhV
+    Data.HashMap.Array:                 219
+    Data.HashMap.Base:                  3602
+
+vecto_DY6msUvqg3iJ5Ak1gSL0h2
+    Data.Vector:                        879
+    Data.Vector.Mutable:                1162
+
+
+
+packed metadata: 212569
+
