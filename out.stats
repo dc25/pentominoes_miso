@@ -5,11 +5,11 @@ DfpZFnZR7Sa7Y07uHwVn10:  10227
 KQpEOkJjX9qJTwsO87bqLg:  216621
 Kf2mIYnZNzX8FVHpQOsI2V:  9806
 aeson_D4zMF1P1ZpsKMgz9HPiZU6:20876
-base:                    486316
+base:                    486129
 ghc-prim:                39861
-ghcjs_7HDZUYLWu6O9tXZr0Fsvpn:21903
+ghcjs_7HDZUYLWu6O9tXZr0Fsvpn:21899
 integer-gmp:             24088
-main:                    89765
+main:                    89292
 miso_Ke37ggrzxfxLj8QGrtVejE:95895
 mtl_CckdaCYdd9aDpmVp4fMiiy:1542
 scien_4m62Psf9729KUEAP4gkY8C:4919
@@ -43,7 +43,7 @@ base
     Control.Exception.Base:             6010
     Control.Monad:                      505
     Data.Either:                        397
-    Data.Foldable:                      4976
+    Data.Foldable:                      4789
     Data.Functor:                       108
     Data.Functor.Identity:              1125
     Data.Maybe:                         1025
@@ -102,7 +102,7 @@ ghc-prim
     GHC.Types:                          1216
 
 ghcjs_7HDZUYLWu6O9tXZr0Fsvpn
-    Data.JSString:                      10154
+    Data.JSString:                      10150
     Data.JSString.Internal.Type:        242
     GHCJS.Foreign.Internal:             366
     GHCJS.Internal.Types:               231
@@ -117,7 +117,7 @@ integer-gmp
 
 main
     Main:                               48051
-    Solve:                              41714
+    Solve:                              41241
 
 miso_Ke37ggrzxfxLj8QGrtVejE
     Miso:                               17609
@@ -156,5 +156,5 @@ vecto_DY6msUvqg3iJ5Ak1gSL0h2
 
 
 
-packed metadata: 209741
+packed metadata: 209824
 
