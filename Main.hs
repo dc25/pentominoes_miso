@@ -8,18 +8,7 @@ import Data.Map as DM
 import Data.Maybe
 import Miso
 import qualified Miso.String as MST (ms)
-import qualified Miso.Svg as MSV
-  ( g_
-  , height_
-  , rect_
-  , style_
-  , svg_
-  , transform_
-  , version_
-  , width_
-  , x_
-  , y_
-  )
+import qualified Miso.Svg as MSV ( g_ , height_ , rect_ , style_ , svg_ , transform_ , version_ , width_ , x_ , y_)
 
 import qualified Solve as S
 
@@ -73,8 +62,11 @@ main = do
       }
 
 updateModel :: Action -> Model -> Miso.Effect Action Model
+
 updateModel (SetRate newRate) model = noEff (model {rate = newRate})
+
 updateModel RequestStep model = noEff (model {stepRequested = True})
+
 updateModel (Init newTime) model@Model {..} = newModel <# (Time <$> Miso.now)
   where
     pieces =
@@ -86,30 +78,32 @@ updateModel (Init newTime) model@Model {..} = newModel <# (Time <$> Miso.now)
       , ['T', 'T', 'T', 'W', 'W', 'N', 'N', 'N', 'U', 'U']
       ]
     board = [(row, col) | row <- [0 .. 11], col <- [0 .. 4]]
+
     newW = 1 + maximum (fmap snd board)
     newH = 1 + maximum (fmap fst board)
+
     (newSolution, newProgress) = runState (S.step0 board pieces) progress
-    newCompleteSolutions =
-      case newSolution of
-        S.Complete _ -> newSolution : completeSolutions
-        S.Incomplete _ -> completeSolutions
+
     newModel =
       model
         { time = newTime
         , progress = newProgress
         , solution = newSolution
-        , completeSolutions = newCompleteSolutions
         , w = newW
         , h = newH
         }
+
 updateModel (Time newTime) model@Model {..} = newModel <# (Time <$> Miso.now)
   where
     newDelta = newTime - time
+
     (newSolution, newProgress) = runState S.step progress
+
     newCompleteSolutions =
       case newSolution of
         S.Complete _ -> newSolution : completeSolutions
         S.Incomplete _ -> completeSolutions
+
     newModel =
       model
         { time = newTime
@@ -120,52 +114,27 @@ updateModel (Time newTime) model@Model {..} = newModel <# (Time <$> Miso.now)
 
 viewModel :: Model -> Miso.View Action
 viewModel model@Model {..} =
-  Miso.div_
-    []
-    (viewControls rate :
-     viewSolution workCellSize w h solution :
-     fmap
-       (viewSolution solutionCellSize w h)
-       (Prelude.reverse completeSolutions))
+  Miso.div_ []
+    ( viewControls rate 
+    : viewSolution workCellSize w h solution 
+    : fmap (viewSolution solutionCellSize w h) (Prelude.reverse completeSolutions))
   where
     workCellSize = 30
     solutionCellSize = (workCellSize * 2) `div` 3
 
 viewControls :: Rate -> Miso.View Action
 viewControls rate =
-  div_
-    []
-    ([ input_
-         [ type_ "radio"
-         , name_ "updateRate"
-         , checked_ (rate == Fast)
-         , onClick (SetRate Fast)
-         ]
-         []
-     , text "Fast"
-     , input_
-         [ type_ "radio"
-         , name_ "updateRate"
-         , checked_ (rate == Slow)
-         , onClick (SetRate Slow)
-         ]
-         []
-     , text "Slow"
-     , input_
-         [ type_ "radio"
-         , name_ "updateRate"
-         , checked_ (rate == Step)
-         , onClick (SetRate Step)
-         ]
-         []
-     , text "Step"
-     ] ++
-     [button_ [onClick RequestStep] [text "Step"] | rate == Step])
+  div_ []
+    ([ input_ [ type_ "radio" , name_ "updateRate" , checked_ (rate == Fast) , onClick (SetRate Fast) ] [] , text "Fast"
+     , input_ [ type_ "radio" , name_ "updateRate" , checked_ (rate == Slow) , onClick (SetRate Slow) ] [] , text "Slow"
+     , input_ [ type_ "radio" , name_ "updateRate" , checked_ (rate == Step) , onClick (SetRate Step) ] [] , text "Step"
+     ] ++ [button_ [onClick RequestStep] [text "Step"] | rate == Step]
+    )
 
 viewSolution :: Int -> Int -> Int -> S.Solution -> Miso.View Action
 viewSolution cellSize width height solution =
   div_
-    [class_ "svg-container"]
+    []
     [ MSV.svg_
         [ MSV.version_ "1.1"
         , MSV.width_ (MST.ms $ show (width * cellSize))
@@ -189,11 +158,7 @@ showCell :: Int -> String -> (Int, Int) -> Miso.View Action
 showCell cellSize color (row, col) =
   MSV.g_
     [ MSV.transform_
-        (MST.ms $
-         "scale (" ++
-         scale ++
-         ", " ++
-         scale ++ ") " ++ "translate (" ++ show col ++ ", " ++ show row ++ ") ")
+        (MST.ms $ "scale (" ++ scale ++ ", " ++ scale ++ ") " ++ "translate (" ++ show col ++ ", " ++ show row ++ ") ")
     ]
     [ MSV.rect_
         [ MSV.x_ "0.05"

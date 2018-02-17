@@ -1,14 +1,6 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 
-module Solve
-  ( Progress
-  , Piece
-  , Solution(..)
-  , step0
-  , step
-  , getName
-  , getLocations
-  ) where
+module Solve ( Progress , Piece , Solution(..) , step0 , step , getName , getLocations) where
 
 import Control.Monad
 import Control.Monad.State
@@ -45,7 +37,7 @@ isName = not . isLocation
 bounds :: Piece -> ((Int, Int), (Int, Int))
 bounds p =
   let locations = DS.filter isLocation p
-      coords = fmap (\(Location (row, col)) -> (row, col)) $ toList locations
+      coords = (\(Location (row, col)) -> (row, col)) <$> toList locations
       rows = fmap fst coords
       cols = fmap snd coords
    in ((minimum rows, minimum cols), (maximum rows, maximum cols))
@@ -98,59 +90,67 @@ fullPlacements board p0 =
       r1 = flipPiece p1
       r2 = flipPiece p2
       r3 = flipPiece p3
+
       placementsWithDuplicates =
-        placements board p0 ++
-        placements board p1 ++
-        placements board p2 ++
-        placements board p3 ++
-        placements board r0 ++
-        placements board r1 ++ placements board r2 ++ placements board r3
+           placements board p0 
+        ++ placements board p1 
+        ++ placements board p2 
+        ++ placements board p3 
+        ++ placements board r0 
+        ++ placements board r1 
+        ++ placements board r2 
+        ++ placements board r3
+
    in nub placementsWithDuplicates
 
 allPlacements :: [Piece] -> Set Place -> Set Piece
 allPlacements pieces board = fromList $ concatMap (fullPlacements board) pieces
 
 nextMoves :: Solution -> Puzzle -> [(Solution, Puzzle)]
-nextMoves layout (board, placements)
-            -- find the spot with the least number of pieces containing it.
- = do
-  let spot =
-        findMin $
-        DS.map (\loc -> (length $ DS.filter (member loc) placements, loc)) board
+nextMoves layout (board, placements) = do
+  -- find the spot with the least number of pieces containing it.
+  let spot = findMin $ DS.map (\loc -> (length $ DS.filter (member loc) placements, loc)) board
+
   guard (fst spot > 0) -- nothing goes here; failed
-        -- get each piece that covers this spot
+
+  -- get each piece that covers this spot
   ns <- toList $ DS.filter (member $ snd spot) placements
-            -- remove the spots covered by this piece from the board
-  let newBoard = board \\ ns
-            -- remove the placements that share a spot with this piece
+
+  let -- remove the spots covered by this piece from the board
+      newBoard = board \\ ns
+
+      -- remove the placements that share a spot with this piece
       newPlacements = DS.filter (DS.null . intersection ns) placements
+
       piecesUsed =
         case layout of
           Incomplete p -> p
           Complete p -> p
-            -- add the piece to the solution being built up.
+
+      -- add the piece to the solution being built up.
       newPiecesUsed = ns : piecesUsed
+
       newSolution =
         if DS.null newBoard
           then Complete newPiecesUsed
           else Incomplete newPiecesUsed
+
   return (newSolution, (newBoard, newPlacements))
 
 step0 :: [(Int, Int)] -> [[Char]] -> State Progress Solution
 step0 squares image = do
-  let indexed =
-        concatMap
-          (\(row, ns) -> zipWith (\col c -> ((row, col), c)) [0 ..] ns)
-          (zip [0 ..] image)
+  let unboundedGrid = [[(row, col) | row <- [0 .. ]] | col <- [0 .. ]]
+  
+      indexed = concat $ zipWith zip unboundedGrid image
+
       names = nub $ concat image
-      pieces =
-        fmap
+
+      pieces = fmap
           (\n ->
              fromList $
-             Name n :
-             (fmap (Location . fst) $
-              Prelude.filter (\((r, c), name) -> name == n) indexed))
+             Name n : ((Location . fst) <$> Prelude.filter (\((r, c), name) -> name == n) indexed))
           names
+
       board = fromList $ fmap Name names ++ fmap Location squares
       placements = allPlacements pieces board
       layout = Incomplete []
