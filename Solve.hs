@@ -108,6 +108,8 @@ allPlacements pieces board = fromList $ concatMap (fullPlacements board) pieces
 
 nextMoves :: Solution -> Puzzle -> [(Solution, Puzzle)]
 nextMoves layout (board, placements) = do
+  guard (not $  DS.null board) -- no space left (solved)
+
   -- find the spot with the least number of pieces containing it.
   let spot = findMin $ DS.map (\loc -> (length $ DS.filter (member loc) placements, loc)) board
 
@@ -161,14 +163,11 @@ step :: State Progress Solution
 step = do
   optionStack <- get
   let (piecesUsed, (board, placements)) = head $ head optionStack
-  if DS.null board -- done with puzzle
-    then put $ pop2 optionStack
-    else do
-      let ns = nextMoves piecesUsed (board, placements)
-      if ns == []
-        then put $ pop2 optionStack
-        else put $ ns : optionStack
-  newOptions :: Progress <- get
+      ns = nextMoves piecesUsed (board, placements)
+  if ns == []
+  then put $ pop2 optionStack
+  else put $ ns : optionStack
+  newOptions <- get
   return $ (fst . head . head) newOptions
 
 pop2 :: [[a]] -> [[a]]
