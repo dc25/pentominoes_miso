@@ -79,19 +79,19 @@ fullPlacements board p0 =
         r3 = flipPiece p3
 
         placementsWithDuplicates 
-           =  (placements board p0) 
-           ++ (placements board p1) 
-           ++ (placements board p2) 
-           ++ (placements board p3) 
-           ++ (placements board r0) 
-           ++ (placements board r1) 
-           ++ (placements board r2) 
-           ++ (placements board r3) 
+           =  placements board p0 
+           ++ placements board p1 
+           ++ placements board p2 
+           ++ placements board p3 
+           ++ placements board r0 
+           ++ placements board r1 
+           ++ placements board r2 
+           ++ placements board r3 
 
     in nub placementsWithDuplicates
 
 allPlacements :: [Piece] -> Set Place -> Set Piece
-allPlacements pieces board = fromList $ concat $ fmap (fullPlacements board) pieces
+allPlacements pieces board = fromList $ concatMap (fullPlacements board) pieces
 
 nextMoves :: Solution -> Puzzle -> [(Solution, Puzzle)]
 nextMoves layout (board, placements) = do
@@ -107,7 +107,7 @@ nextMoves layout (board, placements) = do
             newBoard = board \\ ns 
 
             -- remove the placements that share a spot with this piece
-            newPlacements = DS.filter (DS.null.(intersection ns)) placements
+            newPlacements = DS.filter (DS.null.intersection ns) placements
             piecesUsed = case layout of
                              Incomplete p -> p
                              Complete p -> p
@@ -115,7 +115,7 @@ nextMoves layout (board, placements) = do
             -- add the piece to the solution being built up.
             newPiecesUsed = ns:piecesUsed
 
-            newSolution = if (DS.null newBoard) 
+            newSolution = if DS.null newBoard
                         then Complete newPiecesUsed
                         else Incomplete newPiecesUsed
         return (newSolution, (newBoard, newPlacements))
@@ -123,11 +123,11 @@ nextMoves layout (board, placements) = do
 
 step0 :: [(Int,Int)] -> [[Char]] -> State Progress Solution
 step0 squares image = do
-    let indexed = concat $ fmap (\(row, ns) -> zipWith (\col c -> ((row,col),c)) [0..] ns) (zipWith (,) [0..] image)
+    let indexed = concatMap (\(row, ns) -> zipWith (\col c -> ((row,col),c)) [0..] ns) (zip [0..] image)
 
         names = nub $ concat image
 
-        pieces = fmap (\n -> fromList $ (Name n) : (fmap (Location . fst) $ Prelude.filter (\((r,c),name) -> name==n) indexed)) names
+        pieces = fmap (\n -> fromList $ Name n : (fmap (Location . fst) $ Prelude.filter (\((r,c),name) -> name==n) indexed)) names
 
         board = fromList $ fmap Name names ++ fmap Location squares
 
@@ -155,7 +155,7 @@ step = do
 pop2 :: [[a]] -> [[a]]
 pop2 xss =
     case xss of
-        (_:[]):xs -> pop2 xs 
+        [_]:xs -> pop2 xs 
         (_:ts):xs -> ts:xs
         _ -> xss -- should not happen
 

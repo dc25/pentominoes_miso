@@ -71,8 +71,8 @@ updateModel (Init newTime) model@Model {..} = newModel <# (Time <$> Miso.now)
 
     board = [(row, col) | row <- [0..11], col <- [0..4]]
 
-    newW = 1 + (maximum $ fmap snd board)
-    newH = 1 + (maximum $ fmap fst board)
+    newW = 1 + maximum (fmap snd board)
+    newH = 1 + maximum (fmap fst board)
 
     (newSolution,newProgress) = runState (S.step0 board pieces) progress
 
@@ -113,7 +113,7 @@ viewModel model@Model {..} =
              (Prelude.reverse completeSolutions) 
       )
   where workCellSize = 30
-        solutionCellSize = ((workCellSize * 2)`div` 3)
+        solutionCellSize = (workCellSize * 2) `div` 3
 
 viewControls :: Rate -> Miso.View Action
 viewControls rate = 
@@ -122,7 +122,7 @@ viewControls rate =
     ([ input_ [type_ "radio", name_ "updateRate", checked_ (rate==Fast), onClick (SetRate Fast)] [], text "Fast"
     , input_ [type_ "radio", name_ "updateRate", checked_ (rate==Slow), onClick (SetRate Slow)] [], text "Slow"
     , input_ [type_ "radio", name_ "updateRate", checked_ (rate==Step), onClick (SetRate Step)] [], text "Step"
-    ] ++ if (rate==Step) then [button_ [onClick RequestStep] [text "Step"]] else[])
+    ] ++ [button_ [onClick RequestStep] [text "Step"] | rate == Step])
 
 
 viewSolution :: Int -> Int -> Int -> S.Solution -> Miso.View Action
