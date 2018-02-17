@@ -105,8 +105,8 @@ fullPlacements board p0 =
 allPlacements :: [Piece] -> Set Place -> Set Piece
 allPlacements pieces board = fromList $ concatMap (fullPlacements board) pieces
 
-nextMoves :: Solution -> Puzzle -> [(Solution, Puzzle)]
-nextMoves (Solution pieces remainder) (board, placements) = do
+nextMoves :: (Solution, Puzzle) -> [(Solution, Puzzle)]
+nextMoves ((Solution pieces remainder),(board, placements)) = do
   guard (not $  DS.null board) -- no space left (solved)
 
   -- find the spot with the least number of pieces containing it.
@@ -153,13 +153,15 @@ step0 squares image = do
 step :: State Progress Solution
 step = do
   optionStack <- get
-  let (piecesUsed, (board, placements)) = head $ head optionStack
-      ns = nextMoves piecesUsed (board, placements)
-  if Prelude.null ns 
+  let status = head $ head optionStack
+      newOptions = nextMoves status
+
+  if newOptions == []
   then put $ pop2 optionStack
-  else put $ ns : optionStack
-  newOptions <- get
-  return $ (fst . head . head) newOptions
+  else put $ newOptions : optionStack
+
+  newOptionStack <- get
+  return $ (fst . head . head) newOptionStack
 
 pop2 :: [[a]] -> [[a]]
 pop2 xss =
