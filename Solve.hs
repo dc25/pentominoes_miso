@@ -20,7 +20,7 @@ type Puzzle = (Board, Set Piece)
 
 data Solution = Solution { pieces :: [Piece]
                          , remainder :: Board
-                         } deriving Eq
+                         } deriving (Eq, Show)
 
 type Progress = [[(Solution, Puzzle)]]
 
