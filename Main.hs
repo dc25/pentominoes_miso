@@ -5,6 +5,7 @@ module Main where
 
 import Control.Monad.State
 import Data.Map as DM
+import qualified Data.Set as DS (null)
 import Data.Maybe
 import Miso
 import qualified Miso.String as MST (ms)
@@ -34,7 +35,7 @@ data Model = Model
   , h :: Int
   , rate :: Rate
   , stepRequested :: Bool
-  } deriving (Show, Eq)
+  } deriving Eq
 
 main :: IO ()
 main = do
@@ -42,7 +43,7 @@ main = do
         Model
           { time = 0
           , progress = []
-          , solution = S.Incomplete []
+          , solution = S.Solution [] mempty
           , completeSolutions = []
           , w = 0
           , h = 0
@@ -97,12 +98,12 @@ updateModel (Time newTime) model@Model {..} = newModel <# (Time <$> Miso.now)
   where
     newDelta = newTime - time
 
-    (newSolution, newProgress) = runState S.step progress
+    (newSolution@(S.Solution newPieces newRemainder), newProgress) = runState S.step progress
 
     newCompleteSolutions =
-      case newSolution of
-        S.Complete _ -> newSolution : completeSolutions
-        S.Incomplete _ -> completeSolutions
+      if (DS.null newRemainder)
+      then newSolution : completeSolutions
+      else completeSolutions
 
     newModel =
       model
@@ -132,7 +133,7 @@ viewControls rate =
     )
 
 viewSolution :: Int -> Int -> Int -> S.Solution -> Miso.View Action
-viewSolution cellSize width height solution =
+viewSolution cellSize width height (S.Solution pieces _) =
   div_
     []
     [ MSV.svg_
@@ -142,11 +143,6 @@ viewSolution cellSize width height solution =
         ]
         (Prelude.concatMap (showPiece cellSize) pieces)
     ]
-  where
-    pieces =
-      case solution of
-        S.Complete p -> p
-        S.Incomplete p -> p
 
 showPiece :: Int -> S.Piece -> [Miso.View Action]
 showPiece cellSize p =

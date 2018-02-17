@@ -18,10 +18,9 @@ type Board = Set Place
 
 type Puzzle = (Board, Set Piece)
 
-data Solution
-  = Complete [Piece]
-  | Incomplete [Piece]
-  deriving (Show, Eq)
+data Solution = Solution { pieces :: [Piece]
+                         , remainder :: Board
+                         } deriving Eq
 
 type Progress = [[(Solution, Puzzle)]]
 
@@ -107,7 +106,7 @@ allPlacements :: [Piece] -> Set Place -> Set Piece
 allPlacements pieces board = fromList $ concatMap (fullPlacements board) pieces
 
 nextMoves :: Solution -> Puzzle -> [(Solution, Puzzle)]
-nextMoves layout (board, placements) = do
+nextMoves (Solution pieces remainder) (board, placements) = do
   guard (not $  DS.null board) -- no space left (solved)
 
   -- find the spot with the least number of pieces containing it.
@@ -124,18 +123,10 @@ nextMoves layout (board, placements) = do
       -- remove the placements that share a spot with this piece
       newPlacements = DS.filter (DS.null . intersection ns) placements
 
-      piecesUsed =
-        case layout of
-          Incomplete p -> p
-          Complete p -> p
-
       -- add the piece to the solution being built up.
-      newPiecesUsed = ns : piecesUsed
+      newPiecesUsed = ns : pieces
 
-      newSolution =
-        if DS.null newBoard
-          then Complete newPiecesUsed
-          else Incomplete newPiecesUsed
+      newSolution = Solution newPiecesUsed newBoard
 
   return (newSolution, (newBoard, newPlacements))
 
@@ -155,7 +146,7 @@ step0 squares image = do
 
       board = fromList $ fmap Name names ++ fmap Location squares
       placements = allPlacements pieces board
-      layout = Incomplete []
+      layout = Solution [] board
   put [[(layout, (board, placements))]]
   return layout
 
@@ -164,7 +155,7 @@ step = do
   optionStack <- get
   let (piecesUsed, (board, placements)) = head $ head optionStack
       ns = nextMoves piecesUsed (board, placements)
-  if ns == []
+  if Prelude.null ns 
   then put $ pop2 optionStack
   else put $ ns : optionStack
   newOptions <- get
