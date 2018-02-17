@@ -7,6 +7,7 @@ import qualified Miso.String as MST (ms)
 import qualified Miso.Svg as MSV (g_, style_, width_, height_, transform_, x_, y_, rect_, svg_, version_)
 import Control.Monad.State
 import Data.Map as DM
+import Data.Maybe 
 
 import qualified Solve as S 
 
@@ -22,8 +23,8 @@ data Rate = Fast | Slow | Step deriving (Show, Eq)
 data Model = Model
   { time :: Double
   , progress :: S.Progress
-  , layout :: S.Layout
-  , solutions :: [S.Layout]
+  , solution :: S.Solution
+  , completeSolutions :: [S.Solution]
   , w :: Int
   , h :: Int
   , rate :: Rate
@@ -35,8 +36,8 @@ main = do
   let initialModel = Model 
                        { time = 0
                        , progress = [] 
-                       , layout = S.Incomplete [] 
-                       , solutions = []
+                       , solution = S.Incomplete [] 
+                       , completeSolutions = []
                        , w = 0
                        , h = 0
                        , rate = Step
@@ -73,16 +74,16 @@ updateModel (Init newTime) model@Model {..} = newModel <# (Time <$> Miso.now)
     newW = 1 + (maximum $ fmap snd board)
     newH = 1 + (maximum $ fmap fst board)
 
-    (newLayout,newProgress) = runState (S.step0 board pieces) progress
+    (newSolution,newProgress) = runState (S.step0 board pieces) progress
 
-    newSolutions = case newLayout of
-                       S.Complete _ -> newLayout:solutions
-                       S.Incomplete _ -> solutions
+    newCompleteSolutions = case newSolution of
+                       S.Complete _ -> newSolution:completeSolutions
+                       S.Incomplete _ -> completeSolutions
 
     newModel = model { time = newTime
                      , progress = newProgress
-                     , layout = newLayout
-                     , solutions = newSolutions
+                     , solution = newSolution
+                     , completeSolutions = newCompleteSolutions
                      , w = newW
                      , h = newH
                      }
@@ -90,16 +91,16 @@ updateModel (Init newTime) model@Model {..} = newModel <# (Time <$> Miso.now)
 updateModel (Time newTime) model@Model {..} = newModel <# (Time <$> Miso.now)
   where
     newDelta = newTime - time 
-    (newLayout,newProgress) = runState S.step progress
+    (newSolution,newProgress) = runState S.step progress
 
-    newSolutions = case newLayout of
-                       S.Complete _ -> newLayout:solutions
-                       S.Incomplete _ -> solutions
+    newCompleteSolutions = case newSolution of
+                       S.Complete _ -> newSolution:completeSolutions
+                       S.Incomplete _ -> completeSolutions
 
     newModel = model { time = newTime 
                      , progress = newProgress
-                     , solutions = newSolutions
-                     , layout = newLayout
+                     , completeSolutions = newCompleteSolutions
+                     , solution = newSolution
                      }
 
 viewModel :: Model -> Miso.View Action
@@ -107,9 +108,9 @@ viewModel model@Model {..} =
   Miso.div_
       []
       ( viewControls rate
-      : viewLayout workCellSize w h layout 
-      : fmap (viewLayout solutionCellSize w h) 
-             (Prelude.reverse solutions) 
+      : viewSolution workCellSize w h solution 
+      : fmap (viewSolution solutionCellSize w h) 
+             (Prelude.reverse completeSolutions) 
       )
   where workCellSize = 30
         solutionCellSize = ((workCellSize * 2)`div` 3)
@@ -124,8 +125,8 @@ viewControls rate =
     ] ++ if (rate==Step) then [button_ [onClick RequestStep] [text "Step"]] else[])
 
 
-viewLayout :: Int -> Int -> Int -> S.Layout -> Miso.View Action
-viewLayout cellSize width height layout =
+viewSolution :: Int -> Int -> Int -> S.Solution -> Miso.View Action
+viewSolution cellSize width height solution =
   div_ [class_ "svg-container"]
        [ MSV.svg_
            [ MSV.version_ "1.1"
@@ -134,7 +135,7 @@ viewLayout cellSize width height layout =
            ]
            (Prelude.concatMap (showPiece cellSize) pieces)
        ]
-  where pieces = case layout of
+  where pieces = case solution of
                      S.Complete p -> p
                      S.Incomplete p -> p
 
@@ -176,7 +177,5 @@ getColor name =
                           , ('Y', "navy")
                           , ('Z', "lime")
                           ]
-  in case DM.lookup name colorMap of
-       Just color -> color
-       Nothing -> "black"  -- should not happen.
+  in fromMaybe "black" (DM.lookup name colorMap)
 

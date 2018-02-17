@@ -1,4 +1,6 @@
-module Solve (Progress, Piece, Layout(..), step0, step, getName, getLocations) where
+{-# Language ScopedTypeVariables #-}
+
+module Solve (Progress, Piece, Solution(..), step0, step, getName, getLocations) where
 
 import Data.Set as DS
 import Data.List as DL (sort, nub, repeat)
@@ -10,8 +12,8 @@ data Place = Location (Int,Int) | Name Char deriving (Show, Eq, Ord)
 type Piece = Set Place
 type Board = Set Place
 type Puzzle = (Board, Set Piece)
-data Layout = Complete [Piece] | Incomplete [Piece] deriving (Show, Eq)
-type Progress = [[(Piece, Puzzle)]]
+data Solution = Complete [Piece] | Incomplete [Piece] deriving (Show, Eq)
+type Progress = [[(Solution, Puzzle)]]
 
 
 isLocation :: Place -> Bool
@@ -91,20 +93,35 @@ fullPlacements board p0 =
 allPlacements :: [Piece] -> Set Place -> Set Piece
 allPlacements pieces board = fromList $ concat $ fmap (fullPlacements board) pieces
 
-nextMoves :: Puzzle -> [(Piece, Puzzle)]
-nextMoves (board, placements) = do
-        let spot = findMin $ DS.map  (\loc -> (length $ DS.filter (member loc) placements, loc) ) board
+nextMoves :: Solution -> Puzzle -> [(Solution, Puzzle)]
+nextMoves layout (board, placements) = do
+
+        let -- find the spot with the least number of pieces containing it.
+            spot = findMin $ DS.map  (\loc -> (length $ DS.filter (member loc) placements, loc) ) board
         guard (fst spot > 0)  -- nothing goes here; failed
+
+        -- get each piece that covers this spot
         ns <- toList $ DS.filter (member $ snd spot) placements
-        return (ns, (board \\ ns, DS.filter (DS.null.(intersection ns)) placements))
 
-step :: State Progress Layout
-step = do
-    optionStack <- get
-    let (_,(board,placements )) = head $ head optionStack
-    finishStep optionStack board placements
+        let -- remove the spots covered by this piece from the board
+            newBoard = board \\ ns 
 
-step0 :: [(Int,Int)] -> [[Char]] -> State Progress Layout
+            -- remove the placements that share a spot with this piece
+            newPlacements = DS.filter (DS.null.(intersection ns)) placements
+            piecesUsed = case layout of
+                             Incomplete p -> p
+                             Complete p -> p
+
+            -- add the piece to the solution being built up.
+            newPiecesUsed = ns:piecesUsed
+
+            newSolution = if (DS.null newBoard) 
+                        then Complete newPiecesUsed
+                        else Incomplete newPiecesUsed
+        return (newSolution, (newBoard, newPlacements))
+
+
+step0 :: [(Int,Int)] -> [[Char]] -> State Progress Solution
 step0 squares image = do
     let indexed = concat $ fmap (\(row, ns) -> zipWith (\col c -> ((row,col),c)) [0..] ns) (zipWith (,) [0..] image)
 
@@ -115,25 +132,25 @@ step0 squares image = do
         board = fromList $ fmap Name names ++ fmap Location squares
 
         placements = allPlacements pieces board
-    finishStep [] board placements
+        layout = Incomplete []
+    put [[(layout, (board, placements))]]
+    return layout
 
-finishStep :: Progress -> Board -> Set Piece -> State Progress Layout
-finishStep optionStack board placements = do
-    if DS.null board then 
+
+step :: State Progress Solution
+step = do
+    optionStack <- get
+    let (piecesUsed,(board,placements )) = head $ head optionStack
+    if DS.null board then -- done with puzzle
         put $ pop2 optionStack
     else do
-        let ns = nextMoves (board,placements)
-        if ns == [] then 
-            put $ pop2 optionStack
-        else 
-            put $ ns:optionStack
-    newOptions <- get 
-    let newPieces = fmap (fst.head) newOptions
-        newBoard = (fst.snd.head.head) newOptions
-        newLayout = if DS.null newBoard 
-                 then Complete newPieces
-                 else Incomplete newPieces
-    return newLayout
+         let ns = nextMoves piecesUsed (board,placements)
+         if ns == [] then 
+             put $ pop2 optionStack
+         else 
+             put $ ns:optionStack
+    newOptions :: Progress <- get 
+    return $ (fst.head.head) newOptions
 
 pop2 :: [[a]] -> [[a]]
 pop2 xss =
