@@ -1,6 +1,6 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 
-module Solve ( Progress , Piece , Solution(..) , step0 , step , getName , getLocations) where
+module Solve ( History , Piece , Layout(..) , step0 , step , solve0, getName , getLocations) where
 
 import Control.Monad
 import Control.Monad.State
@@ -16,13 +16,12 @@ type Piece = Set Place
 
 type Board = Set Place
 
-type Puzzle = (Board, Set Piece)
+data Layout = Layout { used :: [Piece]
+                     , uncovered :: Board
+                     , unused :: Set Piece
+                     } deriving (Eq, Show)
 
-data Solution = Solution { pieces :: [Piece]
-                         , remainder :: Board
-                         } deriving (Eq, Show)
-
-type Progress = [[(Solution, Puzzle)]]
+type History = [[Layout]]
 
 isLocation :: Place -> Bool
 isLocation pl =
@@ -105,32 +104,59 @@ fullPlacements board p0 =
 allPlacements :: [Piece] -> Set Place -> Set Piece
 allPlacements pieces board = fromList $ concatMap (fullPlacements board) pieces
 
-nextMoves :: (Solution, Puzzle) -> [(Solution, Puzzle)]
-nextMoves ((Solution pieces remainder),(board, placements)) = do
-  guard (not $  DS.null board) -- no space left (solved)
+next :: Layout -> [Layout]
+next (Layout used uncovered unused) = do
+  guard (not $  DS.null uncovered) -- no space left (solved)
 
-  -- find the spot with the least number of pieces containing it.
-  let spot = findMin $ DS.map (\loc -> (length $ DS.filter (member loc) placements, loc)) board
+  -- find the spot with the least number of unused pieces containing it.
+  let spot = findMin $ DS.map (\loc -> (length $ DS.filter (member loc) unused, loc)) uncovered
 
   guard (fst spot > 0) -- nothing goes here; failed
 
-  -- get each piece that covers this spot
-  ns <- toList $ DS.filter (member $ snd spot) placements
+  -- get each unused piece that covers this spot
+  ns <- toList $ DS.filter (member $ snd spot) unused
 
   let -- remove the spots covered by this piece from the board
-      newBoard = board \\ ns
+      newUncovered = uncovered \\ ns
 
-      -- remove the placements that share a spot with this piece
-      newPlacements = DS.filter (DS.null . intersection ns) placements
+      -- remove the unused pieces that share a spot with this piece
+      newUnused = DS.filter (DS.null . intersection ns) unused
 
       -- add the piece to the solution being built up.
-      newPiecesUsed = ns : pieces
+      newPiecesUsed = ns : used
 
-      newSolution = Solution newPiecesUsed newBoard
+      newLayout = Layout newPiecesUsed newUncovered newUnused
 
-  return (newSolution, (newBoard, newPlacements))
+  return newLayout
 
-step0 :: [(Int, Int)] -> [[Char]] -> State Progress Solution
+solve0 :: [(Int, Int)] -> [[Char]] -> [Layout]
+solve0 squares image = 
+  let unboundedGrid = [[(row, col) | row <- [0 .. ]] | col <- [0 .. ]]
+  
+      indexed = concat $ zipWith zip unboundedGrid image
+
+      names = nub $ concat image
+
+      pieces = fmap
+          (\n ->
+             fromList $
+             Name n : ((Location . fst) <$> Prelude.filter (\((r, c), name) -> name == n) indexed))
+          names
+
+      board = fromList $ fmap Name names ++ fmap Location squares
+      placements = allPlacements pieces board
+      layout = Layout [] board placements
+  in solve layout
+
+solve :: Layout -> [ Layout ]
+solve layout = do
+    nextLayout <- next layout
+    if (DS.null $ uncovered nextLayout)
+    then return nextLayout
+    else solve nextLayout 
+
+
+step0 :: [(Int, Int)] -> [[Char]] -> State History Layout
 step0 squares image = do
   let unboundedGrid = [[(row, col) | row <- [0 .. ]] | col <- [0 .. ]]
   
@@ -146,22 +172,22 @@ step0 squares image = do
 
       board = fromList $ fmap Name names ++ fmap Location squares
       placements = allPlacements pieces board
-      layout = Solution [] board
-  put [[(layout, (board, placements))]]
+      layout = Layout [] board placements
+  put [[layout]]
   return layout
 
-step :: State Progress Solution
+step :: State History Layout
 step = do
-  optionStack <- get
-  let status = head $ head optionStack
-      newOptions = nextMoves status
+  history <- get
+  let newOptions = next $ head $ head history
 
-  if newOptions == []
-  then put $ pop2 optionStack
-  else put $ newOptions : optionStack
+      newHistory = 
+          if newOptions == []
+          then pop2 history
+          else newOptions : history
 
-  newOptionStack <- get
-  return $ (fst . head . head) newOptionStack
+  put newHistory
+  return $ head $ head $ newHistory
 
 pop2 :: [[a]] -> [[a]]
 pop2 xss =

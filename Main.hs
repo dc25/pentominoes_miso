@@ -5,7 +5,7 @@ module Main where
 
 import Control.Monad.State
 import Data.Map as DM
-import qualified Data.Set as DS (null)
+import qualified Data.Set as DS (null, empty)
 import Data.Maybe
 import Miso
 import qualified Miso.String as MST (ms)
@@ -28,9 +28,9 @@ data Rate
 
 data Model = Model
   { time :: Double
-  , progress :: S.Progress
-  , solution :: S.Solution
-  , completeSolutions :: [S.Solution]
+  , history :: S.History
+  , layout :: S.Layout
+  , solutions :: [S.Layout]
   , w :: Int
   , h :: Int
   , rate :: Rate
@@ -42,9 +42,9 @@ main = do
   let initialModel =
         Model
           { time = 0
-          , progress = []
-          , solution = S.Solution [] mempty
-          , completeSolutions = []
+          , history = []
+          , layout = S.Layout [] mempty DS.empty
+          , solutions = []
           , w = 0
           , h = 0
           , rate = Step
@@ -83,13 +83,13 @@ updateModel (Init newTime) model@Model {..} = newModel <# (Time <$> Miso.now)
     newW = 1 + maximum (fmap snd board)
     newH = 1 + maximum (fmap fst board)
 
-    (newSolution, newProgress) = runState (S.step0 board pieces) progress
+    (newLayout, newHistory) = runState (S.step0 board pieces) history
 
     newModel =
       model
         { time = newTime
-        , progress = newProgress
-        , solution = newSolution
+        , history = newHistory
+        , layout = newLayout
         , w = newW
         , h = newH
         }
@@ -98,27 +98,27 @@ updateModel (Time newTime) model@Model {..} = newModel <# (Time <$> Miso.now)
   where
     newDelta = newTime - time
 
-    (newSolution@(S.Solution newPieces newRemainder), newProgress) = runState S.step progress
+    (newLayout@(S.Layout newPieces newRemainder _), newHistory) = runState S.step history
 
-    newCompleteSolutions =
+    newSolutions =
       if (DS.null newRemainder)
-      then newSolution : completeSolutions
-      else completeSolutions
+      then newLayout : solutions
+      else solutions
 
     newModel =
       model
         { time = newTime
-        , progress = newProgress
-        , completeSolutions = newCompleteSolutions
-        , solution = newSolution
+        , history = newHistory
+        , solutions = newSolutions
+        , layout = newLayout
         }
 
 viewModel :: Model -> Miso.View Action
 viewModel model@Model {..} =
   Miso.div_ []
     ( viewControls rate 
-    : viewSolution workCellSize w h solution 
-    : fmap (viewSolution solutionCellSize w h) (Prelude.reverse completeSolutions))
+    : viewLayout workCellSize w h layout 
+    : fmap (viewLayout solutionCellSize w h) (Prelude.reverse solutions))
   where
     workCellSize = 30
     solutionCellSize = (workCellSize * 2) `div` 3
@@ -132,8 +132,8 @@ viewControls rate =
      ] ++ [button_ [onClick RequestStep] [text "Step"] | rate == Step]
     )
 
-viewSolution :: Int -> Int -> Int -> S.Solution -> Miso.View Action
-viewSolution cellSize width height (S.Solution pieces _) =
+viewLayout :: Int -> Int -> Int -> S.Layout -> Miso.View Action
+viewLayout cellSize width height (S.Layout pieces _ _) =
   div_
     []
     [ MSV.svg_
