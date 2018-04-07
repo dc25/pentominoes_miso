@@ -7,6 +7,7 @@ import Control.Monad.State
 import Data.Map as DM
 import qualified Data.Set as DS (null, empty)
 import Data.Maybe
+import Debug.Trace
 import Miso
 import qualified Miso.String as MST (ms)
 import qualified Miso.Svg as MSV ( g_ , height_ , rect_ , style_ , svg_ , transform_ , version_ , width_ , x_ , y_)
@@ -94,23 +95,29 @@ updateModel (Init newTime) model@Model {..} = newModel <# (Time <$> Miso.now)
         , h = newH
         }
 
-updateModel (Time newTime) model@Model {..} = newModel <# (Time <$> Miso.now)
+updateModel (Time nTime) model@Model {..} = newModel <# (Time <$> Miso.now)
   where
-    newDelta = newTime - time
-
-    (newLayout@(S.Layout newPieces newRemainder _), newHistory) = runState S.step history
-
-    newSolutions =
-      if (DS.null newRemainder)
-      then newLayout : solutions
-      else solutions
-
+    delta = nTime - time
+    (newLayout, newHistory, newSolutions, newtime) = 
+        if      ((rate == Slow) && (delta < 400.0))
+           ||   ((rate == Step) && (not stepRequested))
+        then (layout, history, solutions, time)
+        else (nLayout, nHistory, nSolutions, nTime)
+             where (nLayout, nHistory) = runState S.step history
+                   -- if no spots remain uncovered then this layout is a solution
+                   -- so add it to the list of solutions.
+                   nSolutions =
+                     if (DS.null $ S.uncovered nLayout)
+                     then nLayout : solutions
+                     else solutions
+        
     newModel =
       model
-        { time = newTime
+        { time = newtime
         , history = newHistory
         , solutions = newSolutions
         , layout = newLayout
+        , stepRequested = False
         }
 
 viewModel :: Model -> Miso.View Action
