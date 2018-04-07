@@ -125,56 +125,41 @@ next (Layout used uncovered unused) = do
       -- add the piece to the solution being built up.
       newPiecesUsed = ns : used
 
-      newLayout = Layout newPiecesUsed newUncovered newUnused
+  return $ Layout newPiecesUsed newUncovered newUnused
 
-  return newLayout
-
-solve0 :: [(Int, Int)] -> [[Char]] -> [Layout]
-solve0 squares image = 
+nameToPiece :: [[Char]] -> Char -> Piece
+nameToPiece image name = 
   let unboundedGrid = [[(row, col) | row <- [0 .. ]] | col <- [0 .. ]]
-  
       indexed = concat $ zipWith zip unboundedGrid image
+      pieceCoords = Prelude.filter (\((r, c), n) -> n == name) indexed
+  in fromList $ Name name : ((Location . fst) <$> pieceCoords)
 
-      names = nub $ concat image
+initialLayout :: [(Int, Int)] -> [[Char]] -> Layout
+initialLayout squares image = 
+  let names = nub $ concat image
 
-      pieces = fmap
-          (\n ->
-             fromList $
-             Name n : ((Location . fst) <$> Prelude.filter (\((r, c), name) -> name == n) indexed))
-          names
+      pieces = fmap (nameToPiece image) names
 
       board = fromList $ fmap Name names ++ fmap Location squares
       placements = allPlacements pieces board
-      layout = Layout [] board placements
-  in solve layout
+  in Layout [] board placements
 
 solve :: Layout -> [ Layout ]
 solve layout = do
-    nextLayout <- next layout
-    if (DS.null $ uncovered nextLayout)
-    then return nextLayout
-    else solve nextLayout 
+  if (DS.null $ uncovered layout) -- no space left (solved)
+  then return layout
+  else solve =<< next layout
 
+solve0 :: [(Int, Int)] -> [[Char]] -> [Layout]
+solve0 squares image = 
+  solve $ initialLayout squares image
 
-step0 :: [(Int, Int)] -> [[Char]] -> State History Layout
-step0 squares image = do
-  let unboundedGrid = [[(row, col) | row <- [0 .. ]] | col <- [0 .. ]]
-  
-      indexed = concat $ zipWith zip unboundedGrid image
-
-      names = nub $ concat image
-
-      pieces = fmap
-          (\n ->
-             fromList $
-             Name n : ((Location . fst) <$> Prelude.filter (\((r, c), name) -> name == n) indexed))
-          names
-
-      board = fromList $ fmap Name names ++ fmap Location squares
-      placements = allPlacements pieces board
-      layout = Layout [] board placements
-  put [[layout]]
-  return layout
+pop2 :: [[a]] -> [[a]]
+pop2 xss =
+  case xss of
+    [_]:xs -> pop2 xs
+    (_:ts):xs -> ts : xs
+    _ -> xss -- should not happen
 
 step :: State History Layout
 step = do
@@ -189,22 +174,21 @@ step = do
   put newHistory
   return $ head $ head $ newHistory
 
-pop2 :: [[a]] -> [[a]]
-pop2 xss =
-  case xss of
-    [_]:xs -> pop2 xs
-    (_:ts):xs -> ts : xs
-    _ -> xss -- should not happen
+step0 :: [(Int, Int)] -> [[Char]] -> State History Layout
+step0 squares image = do
+  let layout = initialLayout squares image
+  put [[layout]]
+  return layout
 
 getName :: Piece -> Char
 getName p =
   let Name ch = head $ toList $ DS.filter isName p
-   in ch
+  in ch
 
 getLocation :: Place -> (Int, Int)
 getLocation pl =
   let Location lo = pl
-   in lo
+  in lo
 
 getLocations :: Piece -> [(Int, Int)]
 getLocations = fmap getLocation . toList . DS.filter isLocation
