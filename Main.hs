@@ -8,10 +8,13 @@ import Data.Map as DM
 import qualified Data.Set as DS (null, empty)
 import Data.Maybe
 import Debug.Trace
+
 import Miso
 import qualified Miso.String as MST (ms)
 import qualified Miso.Svg as MSV ( g_ , height_ , rect_ , style_ , svg_ , transform_ , version_ , width_ , x_ , y_)
 
+import Types 
+import Utilities
 import qualified Solve as S
 
 data Action
@@ -29,9 +32,9 @@ data Rate
 
 data Model = Model
   { time :: Double
-  , history :: S.History
-  , progress :: S.Progress
-  , solutions :: [S.Progress]
+  , history :: History
+  , progress :: Progress
+  , solutions :: [Progress]
   , w :: Int
   , h :: Int
   , rate :: Rate
@@ -44,7 +47,7 @@ main = do
         Model
           { time = 0
           , history = []
-          , progress = S.Progress [] mempty DS.empty
+          , progress = Progress [] mempty DS.empty
           , solutions = []
           , w = 0
           , h = 0
@@ -107,7 +110,7 @@ updateModel (Time nTime) model@Model {..} = newModel <# (Time <$> Miso.now)
                    -- if no spots remain uncovered then this progress is a solution
                    -- so add it to the list of solutions.
                    nSolutions =
-                     if (DS.null $ S.uncovered nProgress)
+                     if (DS.null $ uncovered nProgress)
                      then nProgress : solutions
                      else solutions
         
@@ -127,7 +130,7 @@ viewModel model@Model {..} =
     : viewProgress workCellSize w h progress 
     : fmap (viewProgress solutionCellSize w h) (Prelude.reverse solutions))
   where
-    workCellSize = 40
+    workCellSize = 25
     solutionCellSize = (workCellSize * 2) `div` 3
 
 viewControls :: Rate -> Miso.View Action
@@ -139,8 +142,8 @@ viewControls rate =
      ] ++ [button_ [onClick RequestStep] [text "Step"] | rate == Step]
     )
 
-viewProgress :: Int -> Int -> Int -> S.Progress -> Miso.View Action
-viewProgress cellSize width height (S.Progress pieces _ _) =
+viewProgress :: Int -> Int -> Int -> Progress -> Miso.View Action
+viewProgress cellSize width height (Progress pieces _ _) =
   div_
     []
     [ MSV.svg_
@@ -151,10 +154,10 @@ viewProgress cellSize width height (S.Progress pieces _ _) =
         (Prelude.concatMap (showPiece cellSize) pieces)
     ]
 
-showPiece :: Int -> S.Piece -> [Miso.View Action]
+showPiece :: Int -> Piece -> [Miso.View Action]
 showPiece cellSize p =
-  let name = S.getName p
-      locations = S.getLocations p
+  let name = getName p
+      locations = getLocations p
   in fmap (showCell cellSize (getColor name)) locations
 
 showCell :: Int -> String -> (Int, Int) -> Miso.View Action

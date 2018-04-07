@@ -1,5 +1,6 @@
 import Control.Monad.State
 
+import Types
 import Solve
 
 main = do
