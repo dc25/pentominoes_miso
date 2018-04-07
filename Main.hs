@@ -15,7 +15,7 @@ import qualified Miso.Svg as MSV ( g_ , height_ , rect_ , style_ , svg_ , transf
 
 import Types 
 import Utilities
-import qualified Solve as S
+import Solve 
 
 data Action
   = Init Double
@@ -82,12 +82,12 @@ updateModel (Init newTime) model@Model {..} = newModel <# (Time <$> Miso.now)
       , ['I', 'T', 'W', 'W', 'N', 'N', 'F', 'Z', 'Z', 'U']
       , ['T', 'T', 'T', 'W', 'W', 'N', 'N', 'N', 'U', 'U']
       ]
-    board = [(row, col) | row <- [0 .. 4], col <- [0 .. 11]]
+    board = [(row, col) | row <- [0 .. 11], col <- [0 .. 4]]
 
     newW = 1 + maximum (fmap snd board)
     newH = 1 + maximum (fmap fst board)
 
-    (newProgress, newHistory) = runState (S.step0 board pieces) history
+    (newProgress, newHistory) = runState (step0 board pieces) history
 
     newModel =
       model
@@ -106,7 +106,7 @@ updateModel (Time nTime) model@Model {..} = newModel <# (Time <$> Miso.now)
            ||   ((rate == Step) && (not stepRequested))
         then (progress, history, solutions, time)
         else (nProgress, nHistory, nSolutions, nTime)
-             where (nProgress, nHistory) = runState S.step history
+             where (nProgress, nHistory) = runState step history
                    -- if no spots remain uncovered then this progress is a solution
                    -- so add it to the list of solutions.
                    nSolutions =
