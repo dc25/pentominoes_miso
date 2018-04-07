@@ -79,7 +79,7 @@ updateModel (Init newTime) model@Model {..} = newModel <# (Time <$> Miso.now)
       , ['I', 'T', 'W', 'W', 'N', 'N', 'F', 'Z', 'Z', 'U']
       , ['T', 'T', 'T', 'W', 'W', 'N', 'N', 'N', 'U', 'U']
       ]
-    board = [(row, col) | row <- [0 .. 11], col <- [0 .. 4]]
+    board = [(row, col) | row <- [0 .. 4], col <- [0 .. 11]]
 
     newW = 1 + maximum (fmap snd board)
     newH = 1 + maximum (fmap fst board)
@@ -127,7 +127,7 @@ viewModel model@Model {..} =
     : viewLayout workCellSize w h layout 
     : fmap (viewLayout solutionCellSize w h) (Prelude.reverse solutions))
   where
-    workCellSize = 30
+    workCellSize = 40
     solutionCellSize = (workCellSize * 2) `div` 3
 
 viewControls :: Rate -> Miso.View Action
@@ -155,7 +155,7 @@ showPiece :: Int -> S.Piece -> [Miso.View Action]
 showPiece cellSize p =
   let name = S.getName p
       locations = S.getLocations p
-   in fmap (showCell cellSize (getColor name)) locations
+  in fmap (showCell cellSize (getColor name)) locations
 
 showCell :: Int -> String -> (Int, Int) -> Miso.View Action
 showCell cellSize color (row, col) =
