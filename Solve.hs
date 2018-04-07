@@ -1,6 +1,6 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 
-module Solve ( History , Piece , Layout(..) , step0 , step , solve0, getName , getLocations) where
+module Solve ( History , Piece , Progress(..) , step0 , step , solve0, getName , getLocations) where
 
 import Control.Monad
 import Control.Monad.State
@@ -16,12 +16,12 @@ type Piece = Set Place
 
 type Board = Set Place
 
-data Layout = Layout { used :: [Piece]
+data Progress = Progress { used :: [Piece]
                      , uncovered :: Board
                      , unused :: Set Piece
                      } deriving (Eq, Show)
 
-type History = [[Layout]]
+type History = [[Progress]]
 
 isLocation :: Place -> Bool
 isLocation pl =
@@ -104,8 +104,8 @@ fullPlacements board p0 =
 allPlacements :: [Piece] -> Set Place -> Set Piece
 allPlacements pieces board = fromList $ concatMap (fullPlacements board) pieces
 
-next :: Layout -> [Layout]
-next (Layout used uncovered unused) = do
+next :: Progress -> [Progress]
+next (Progress used uncovered unused) = do
   guard (not $  DS.null uncovered) -- no space left (solved)
 
   -- find the spot with the least number of unused pieces containing it.
@@ -125,7 +125,7 @@ next (Layout used uncovered unused) = do
       -- add the piece to the solution being built up.
       newPiecesUsed = ns : used
 
-  return $ Layout newPiecesUsed newUncovered newUnused
+  return $ Progress newPiecesUsed newUncovered newUnused
 
 nameToPiece :: [[Char]] -> Char -> Piece
 nameToPiece image name = 
@@ -134,25 +134,25 @@ nameToPiece image name =
       pieceCoords = Prelude.filter (\((r, c), n) -> n == name) indexed
   in fromList $ Name name : ((Location . fst) <$> pieceCoords)
 
-initialLayout :: [(Int, Int)] -> [[Char]] -> Layout
-initialLayout squares image = 
+initialProgress :: [(Int, Int)] -> [[Char]] -> Progress
+initialProgress squares image = 
   let names = nub $ concat image
 
       pieces = fmap (nameToPiece image) names
 
       board = fromList $ fmap Name names ++ fmap Location squares
       placements = allPlacements pieces board
-  in Layout [] board placements
+  in Progress [] board placements
 
-solve :: Layout -> [ Layout ]
-solve layout = do
-  if (DS.null $ uncovered layout) -- no space left (solved)
-  then return layout
-  else solve =<< next layout
+solve :: Progress -> [ Progress ]
+solve progress = do
+  if (DS.null $ uncovered progress) -- no space left (solved)
+  then return progress
+  else solve =<< next progress
 
-solve0 :: [(Int, Int)] -> [[Char]] -> [Layout]
+solve0 :: [(Int, Int)] -> [[Char]] -> [Progress]
 solve0 squares image = 
-  solve $ initialLayout squares image
+  solve $ initialProgress squares image
 
 pop2 :: [[a]] -> [[a]]
 pop2 xss =
@@ -161,7 +161,7 @@ pop2 xss =
     (_:ts):xs -> ts : xs
     _ -> xss -- should not happen
 
-step :: State History Layout
+step :: State History Progress
 step = do
   history <- get
   let newOptions = next $ head $ head history
@@ -174,11 +174,11 @@ step = do
   put newHistory
   return $ head $ head $ newHistory
 
-step0 :: [(Int, Int)] -> [[Char]] -> State History Layout
+step0 :: [(Int, Int)] -> [[Char]] -> State History Progress
 step0 squares image = do
-  let layout = initialLayout squares image
-  put [[layout]]
-  return layout
+  let progress = initialProgress squares image
+  put [[progress]]
+  return progress
 
 getName :: Piece -> Char
 getName p =

@@ -30,8 +30,8 @@ data Rate
 data Model = Model
   { time :: Double
   , history :: S.History
-  , layout :: S.Layout
-  , solutions :: [S.Layout]
+  , progress :: S.Progress
+  , solutions :: [S.Progress]
   , w :: Int
   , h :: Int
   , rate :: Rate
@@ -44,7 +44,7 @@ main = do
         Model
           { time = 0
           , history = []
-          , layout = S.Layout [] mempty DS.empty
+          , progress = S.Progress [] mempty DS.empty
           , solutions = []
           , w = 0
           , h = 0
@@ -84,13 +84,13 @@ updateModel (Init newTime) model@Model {..} = newModel <# (Time <$> Miso.now)
     newW = 1 + maximum (fmap snd board)
     newH = 1 + maximum (fmap fst board)
 
-    (newLayout, newHistory) = runState (S.step0 board pieces) history
+    (newProgress, newHistory) = runState (S.step0 board pieces) history
 
     newModel =
       model
         { time = newTime
         , history = newHistory
-        , layout = newLayout
+        , progress = newProgress
         , w = newW
         , h = newH
         }
@@ -98,17 +98,17 @@ updateModel (Init newTime) model@Model {..} = newModel <# (Time <$> Miso.now)
 updateModel (Time nTime) model@Model {..} = newModel <# (Time <$> Miso.now)
   where
     delta = nTime - time
-    (newLayout, newHistory, newSolutions, newtime) = 
+    (newProgress, newHistory, newSolutions, newtime) = 
         if      ((rate == Slow) && (delta < 400.0))
            ||   ((rate == Step) && (not stepRequested))
-        then (layout, history, solutions, time)
-        else (nLayout, nHistory, nSolutions, nTime)
-             where (nLayout, nHistory) = runState S.step history
-                   -- if no spots remain uncovered then this layout is a solution
+        then (progress, history, solutions, time)
+        else (nProgress, nHistory, nSolutions, nTime)
+             where (nProgress, nHistory) = runState S.step history
+                   -- if no spots remain uncovered then this progress is a solution
                    -- so add it to the list of solutions.
                    nSolutions =
-                     if (DS.null $ S.uncovered nLayout)
-                     then nLayout : solutions
+                     if (DS.null $ S.uncovered nProgress)
+                     then nProgress : solutions
                      else solutions
         
     newModel =
@@ -116,7 +116,7 @@ updateModel (Time nTime) model@Model {..} = newModel <# (Time <$> Miso.now)
         { time = newtime
         , history = newHistory
         , solutions = newSolutions
-        , layout = newLayout
+        , progress = newProgress
         , stepRequested = False
         }
 
@@ -124,8 +124,8 @@ viewModel :: Model -> Miso.View Action
 viewModel model@Model {..} =
   Miso.div_ []
     ( viewControls rate 
-    : viewLayout workCellSize w h layout 
-    : fmap (viewLayout solutionCellSize w h) (Prelude.reverse solutions))
+    : viewProgress workCellSize w h progress 
+    : fmap (viewProgress solutionCellSize w h) (Prelude.reverse solutions))
   where
     workCellSize = 40
     solutionCellSize = (workCellSize * 2) `div` 3
@@ -139,8 +139,8 @@ viewControls rate =
      ] ++ [button_ [onClick RequestStep] [text "Step"] | rate == Step]
     )
 
-viewLayout :: Int -> Int -> Int -> S.Layout -> Miso.View Action
-viewLayout cellSize width height (S.Layout pieces _ _) =
+viewProgress :: Int -> Int -> Int -> S.Progress -> Miso.View Action
+viewProgress cellSize width height (S.Progress pieces _ _) =
   div_
     []
     [ MSV.svg_
