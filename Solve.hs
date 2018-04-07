@@ -9,18 +9,9 @@ import Data.Set as DS
 import Types
 import Init
 
-isLocation :: Place -> Bool
-isLocation pl =
-  case pl of
-    Location coords -> True
-    Name _ -> False
-
-isName :: Place -> Bool
-isName = not . isLocation
-
 next :: Progress -> [Progress]
 next (Progress used uncovered unused) = do
-  guard (not $  DS.null uncovered) -- no space left (solved)
+  guard (not $  DS.null uncovered) -- no uncovered space left (solved)
 
   -- find the spot with the least number of unused pieces containing it.
   let spot = findMin $ DS.map (\loc -> (length $ DS.filter (member loc) unused, loc)) uncovered
@@ -40,23 +31,6 @@ next (Progress used uncovered unused) = do
       newPiecesUsed = ns : used
 
   return $ Progress newPiecesUsed newUncovered newUnused
-
-nameToPiece :: [[Char]] -> Char -> Piece
-nameToPiece image name = 
-  let unboundedGrid = [[(row, col) | row <- [0 .. ]] | col <- [0 .. ]]
-      indexed = concat $ zipWith zip unboundedGrid image
-      pieceCoords = Prelude.filter (\((r, c), n) -> n == name) indexed
-  in fromList $ Name name : ((Location . fst) <$> pieceCoords)
-
-initialProgress :: [(Int, Int)] -> [[Char]] -> Progress
-initialProgress squares image = 
-  let names = DL.nub $ concat image
-
-      pieces = fmap (nameToPiece image) names
-
-      board = fromList $ fmap Name names ++ fmap Location squares
-      placements = allPlacements pieces board
-  in Progress [] board placements
 
 solve :: Progress -> [ Progress ]
 solve progress = do
@@ -93,4 +67,3 @@ step0 squares image = do
   let progress = initialProgress squares image
   put [[progress]]
   return progress
-

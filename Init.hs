@@ -1,4 +1,4 @@
-module Init ( allPlacements ) where
+module Init ( initialProgress ) where
 
 import Data.List 
 import Data.Set as DS
@@ -77,4 +77,21 @@ fullPlacements board p0 =
 
 allPlacements :: [Piece] -> Set Place -> Set Piece
 allPlacements pieces board = fromList $ concatMap (fullPlacements board) pieces
+
+nameToPiece :: [[Char]] -> Char -> Piece
+nameToPiece image name = 
+  let unboundedGrid = [[(row, col) | row <- [0 .. ]] | col <- [0 .. ]]
+      indexed = concat $ zipWith zip unboundedGrid image
+      pieceCoords = Prelude.filter (\((r, c), n) -> n == name) indexed
+  in fromList $ Name name : ((Location . fst) <$> pieceCoords)
+
+initialProgress :: [(Int, Int)] -> [[Char]] -> Progress
+initialProgress squares image = 
+  let names = nub $ concat image
+
+      pieces = fmap (nameToPiece image) names
+
+      board = fromList $ fmap Name names ++ fmap Location squares
+      placements = allPlacements pieces board
+  in Progress [] board placements
 
