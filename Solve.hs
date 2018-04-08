@@ -1,10 +1,11 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 
-module Solve ( step0 , step , solve0) where
+module Solve ( step0 , step , solve0, solve0b) where
 
 import Control.Monad.State
 import qualified Data.List as DL (nub)
 import Data.Set as DS
+import Data.Tree
 
 import Types
 import Init
@@ -41,6 +42,12 @@ solve progress = do
 solve0 :: [(Int, Int)] -> [[Char]] -> [Progress]
 solve0 squares image = 
   solve $ initialProgress squares image
+
+solve0b :: [(Int, Int)] -> [[Char]] -> [Progress]
+solve0b squares image = 
+  let ip = initialProgress squares image
+      progressTree = unfoldTree (\p -> (p, next p)) ip
+  in Prelude.filter ((DS.null) . uncovered ) $ flatten progressTree
 
 pop2 :: [[a]] -> [[a]]
 pop2 xss =

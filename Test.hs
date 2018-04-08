@@ -13,5 +13,5 @@ main = do
         , ['T', 'T', 'T', 'W', 'W', 'N', 'N', 'N', 'U', 'U']
         ]
       board = [(row, col) | row <- [0 .. 11], col <- [0 .. 4]]
-      solution = solve0 board pieces 
+      solution = solve0b board pieces 
   mapM_ print $ used $ head solution
