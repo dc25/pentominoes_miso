@@ -33,7 +33,6 @@ data Rate
 data Model = Model
   { time :: Double
   , history :: History
-  , progress :: Progress
   , solutions :: [Progress]
   , w :: Int
   , h :: Int
@@ -47,7 +46,6 @@ main = do
         Model
           { time = 0
           , history = []
-          , progress = Progress [] mempty DS.empty
           , solutions = []
           , w = 0
           , h = 0
@@ -87,13 +85,12 @@ updateModel (Init newTime) model@Model {..} = newModel <# (Time <$> Miso.now)
     newW = 1 + maximum (fmap snd board)
     newH = 1 + maximum (fmap fst board)
 
-    (newProgress, newHistory) = runState (step0 board pieces) history
+    (_, newHistory) = runState (step0 board pieces) history
 
     newModel =
       model
         { time = newTime
         , history = newHistory
-        , progress = newProgress
         , w = newW
         , h = newH
         }
@@ -101,12 +98,13 @@ updateModel (Init newTime) model@Model {..} = newModel <# (Time <$> Miso.now)
 updateModel (Time nTime) model@Model {..} = newModel <# (Time <$> Miso.now)
   where
     delta = nTime - time
-    (newProgress, newHistory, newSolutions, newtime) = 
+    (newHistory, newSolutions, newtime) = 
         if      ((rate == Slow) && (delta < 400.0))
            ||   ((rate == Step) && (not stepRequested))
-        then (progress, history, solutions, time)
-        else (nProgress, nHistory, nSolutions, nTime)
-             where (nProgress, nHistory) = runState step history
+        then (history, solutions, time)
+        else (nHistory, nSolutions, nTime)
+             where (_, nHistory) = runState step history
+                   nProgress = head $ head nHistory
                    -- if no spots remain uncovered then this progress is a solution
                    -- so add it to the list of solutions.
                    nSolutions =
@@ -119,7 +117,6 @@ updateModel (Time nTime) model@Model {..} = newModel <# (Time <$> Miso.now)
         { time = newtime
         , history = newHistory
         , solutions = newSolutions
-        , progress = newProgress
         , stepRequested = False
         }
 
@@ -127,7 +124,7 @@ viewModel :: Model -> Miso.View Action
 viewModel model@Model {..} =
   Miso.div_ []
     ( viewControls rate 
-    : viewProgress workCellSize w h progress 
+    : viewProgress workCellSize w h (if ([] == history) then  Progress [] mempty DS.empty else (head $ head history))
     : fmap (viewProgress solutionCellSize w h) (Prelude.reverse solutions))
   where
     workCellSize = 25

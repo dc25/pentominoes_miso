@@ -2,14 +2,14 @@ code size summary per package:
 
 AHOOhHjGLItBYmDB2lAxxO:  826
 DfpZFnZR7Sa7Y07uHwVn10:  10227
-KQpEOkJjX9qJTwsO87bqLg:  219874
+KQpEOkJjX9qJTwsO87bqLg:  222900
 Kf2mIYnZNzX8FVHpQOsI2V:  9806
 aeson_D4zMF1P1ZpsKMgz9HPiZU6:20876
 base:                    487500
 ghc-prim:                40126
-ghcjs_7HDZUYLWu6O9tXZr0Fsvpn:22028
+ghcjs_7HDZUYLWu6O9tXZr0Fsvpn:22039
 integer-gmp:             24088
-main:                    96314
+main:                    95967
 miso_CSCy35BTm867ouaMoBy3jV:95566
 mtl_CckdaCYdd9aDpmVp4fMiiy:1542
 scien_4m62Psf9729KUEAP4gkY8C:4919
@@ -31,6 +31,7 @@ KQpEOkJjX9qJTwsO87bqLg
     Data.Map.Base:                      55948
     Data.Sequence:                      37067
     Data.Set.Base:                      126859
+    Data.Tree:                          3026
 
 Kf2mIYnZNzX8FVHpQOsI2V
     Control.Monad.Trans.State.Lazy:     9806
@@ -106,8 +107,8 @@ ghcjs_7HDZUYLWu6O9tXZr0Fsvpn
     Data.JSString.Internal.Type:        244
     GHCJS.Foreign.Internal:             366
     GHCJS.Internal.Types:               233
-    GHCJS.Marshal:                      8538
-    GHCJS.Marshal.Internal:             1091
+    GHCJS.Marshal:                      8542
+    GHCJS.Marshal.Internal:             1098
     GHCJS.Marshal.Pure:                 390
     JavaScript.Web.AnimationFrame:      962
 
@@ -116,9 +117,9 @@ integer-gmp
     GHC.Integer.Type:                   23755
 
 main
-    Init:                               14911
-    Main:                               49839
-    Solve:                              14661
+    Init:                               19456
+    Main:                               48507
+    Solve:                              11101
     Types:                              14724
     Utilities:                          2179
 
@@ -159,5 +160,5 @@ vecto_DY6msUvqg3iJ5Ak1gSL0h2
 
 
 
-packed metadata: 212562
+packed metadata: 213417
 
