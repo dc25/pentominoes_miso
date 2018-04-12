@@ -75,9 +75,14 @@ fullPlacements board p0 =
 
    in nub placementsWithDuplicates
 
+-- Given a list of pieces and a board (Set of Spots) construct the
+-- set of all placements on the board of translations and rotations 
+-- of the pieces, 
 allPlacements :: [Piece] -> Set Spot -> Set Piece
 allPlacements pieces board = fromList $ concatMap (fullPlacements board) pieces
 
+-- Given an image (list of lists) of a bunch of piece names (chars) and 
+-- the name of a particular piece, construct the Piece (a Set of Spots) .
 nameToPiece :: [[Char]] -> Char -> Piece
 nameToPiece image name = 
   let unboundedGrid = [[(row, col) | row <- [0 .. ]] | col <- [0 .. ]]

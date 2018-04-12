@@ -8,7 +8,7 @@ base:                    486056
 ghc-prim:                39576
 ghcjs_7HDZUYLWu6O9tXZr0Fsvpn:21894
 integer-gmp:             24088
-main:                    83808
+main:                    83784
 miso_CSCy35BTm867ouaMoBy3jV:95373
 scien_4m62Psf9729KUEAP4gkY8C:4919
 text_DfPPBlezQfj0WJcyB3QXey:1951
@@ -111,10 +111,10 @@ integer-gmp
     GHC.Integer.Type:                   23755
 
 main
-    Init:                               19456
+    Init:                               19445
     Main:                               41630
-    Solve:                              5817
-    Types:                              14724
+    Solve:                              5811
+    Types:                              14717
     Utilities:                          2181
 
 miso_CSCy35BTm867ouaMoBy3jV
@@ -151,5 +151,5 @@ vecto_DY6msUvqg3iJ5Ak1gSL0h2
 
 
 
-packed metadata: 204308
+packed metadata: 204305
 
