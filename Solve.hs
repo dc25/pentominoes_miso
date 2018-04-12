@@ -1,10 +1,7 @@
-{-# LANGUAGE ScopedTypeVariables #-}
-
 module Solve ( allSteps, solve) where
 
-import Control.Monad.State
-import qualified Data.List as DL (nub)
-import Data.Set as DS
+import Control.Monad
+import Data.Set as DS 
 import Data.Tree
 
 import Types

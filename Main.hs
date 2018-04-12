@@ -3,9 +3,8 @@
 
 module Main where
 
-import Control.Monad.State
 import Data.Map as DM
-import qualified Data.Set as DS (null, empty)
+import qualified Data.Set as DS (null)
 import Data.Maybe
 
 import Miso
@@ -118,7 +117,7 @@ viewModel model@Model {..} =
     : viewProgress  workCellSize w h (head steps)
     : fmap (viewProgress solutionCellSize w h) (Prelude.reverse solutions))
   where
-    workCellSize = 30
+    workCellSize = 36
     solutionCellSize = (workCellSize * 2) `div` 3
 
 viewControls :: Rate -> Miso.View Action
