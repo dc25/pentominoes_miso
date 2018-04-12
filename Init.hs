@@ -14,32 +14,32 @@ bounds p =
       cols = fmap snd coords
    in ((minimum rows, minimum cols), (maximum rows, maximum cols))
 
-translateLocation :: (Int, Int) -> Spot -> Spot
-translateLocation (vshift, hshift) loc =
+translateSpot :: (Int, Int) -> Spot -> Spot
+translateSpot (vshift, hshift) loc =
   case loc of
     Location (row, col) -> Location (row + vshift, col + hshift)
     _ -> loc
 
-rotateLocation :: Spot -> Spot
-rotateLocation loc =
+rotateSpot :: Spot -> Spot
+rotateSpot loc =
   case loc of
     Location (row, col) -> Location (col, -row)
     _ -> loc
 
-flipLocation :: Spot -> Spot
-flipLocation loc =
+flipSpot :: Spot -> Spot
+flipSpot loc =
   case loc of
     Location (row, col) -> Location (col, row)
     _ -> loc
 
 translatePiece :: Piece -> (Int, Int) -> Piece
-translatePiece p shift = DS.map (translateLocation shift) p
+translatePiece p shift = DS.map (translateSpot shift) p
 
 rotatePiece :: Piece -> Piece
-rotatePiece p = DS.map rotateLocation p
+rotatePiece p = DS.map rotateSpot p
 
 flipPiece :: Piece -> Piece
-flipPiece p = DS.map flipLocation p
+flipPiece p = DS.map flipSpot p
 
 translations :: Set Spot -> Piece -> [(Int, Int)]
 translations board p = do
@@ -87,11 +87,16 @@ nameToPiece image name =
 
 initialProgress :: [(Int, Int)] -> [[Char]] -> Progress
 initialProgress squares image = 
-  let names = nub $ concat image
+  let -- gather the names
+      names = nub $ concat image
 
+      -- construct the pieces by name.
       pieces = fmap (nameToPiece image) names
 
-      board = fromList $ fmap Name names ++ fmap Location squares
-      placements = allPlacements pieces board
-  in Progress [] board placements
+      -- construct the board - a set of both Name and Location Spots.
+      emptyBoard = fromList $ fmap Name names ++ fmap Location squares
+
+      -- gather all possible placements of the pieces on the board.
+      placements = allPlacements pieces emptyBoard
+  in Progress [] emptyBoard placements
 
