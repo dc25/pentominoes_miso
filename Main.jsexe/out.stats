@@ -2,16 +2,14 @@ code size summary per package:
 
 AHOOhHjGLItBYmDB2lAxxO:  826
 DfpZFnZR7Sa7Y07uHwVn10:  10227
-KQpEOkJjX9qJTwsO87bqLg:  222900
-Kf2mIYnZNzX8FVHpQOsI2V:  9806
+KQpEOkJjX9qJTwsO87bqLg:  211792
 aeson_D4zMF1P1ZpsKMgz9HPiZU6:20876
-base:                    487500
-ghc-prim:                40126
-ghcjs_7HDZUYLWu6O9tXZr0Fsvpn:22039
+base:                    486056
+ghc-prim:                39576
+ghcjs_7HDZUYLWu6O9tXZr0Fsvpn:21894
 integer-gmp:             24088
-main:                    95967
-miso_CSCy35BTm867ouaMoBy3jV:95566
-mtl_CckdaCYdd9aDpmVp4fMiiy:1542
+main:                    83808
+miso_CSCy35BTm867ouaMoBy3jV:95373
 scien_4m62Psf9729KUEAP4gkY8C:4919
 text_DfPPBlezQfj0WJcyB3QXey:1951
 unord_34NWiEgrMCw8NUnSnAxkhV:3821
@@ -30,11 +28,8 @@ DfpZFnZR7Sa7Y07uHwVn10
 KQpEOkJjX9qJTwsO87bqLg
     Data.Map.Base:                      55948
     Data.Sequence:                      37067
-    Data.Set.Base:                      126859
+    Data.Set.Base:                      115751
     Data.Tree:                          3026
-
-Kf2mIYnZNzX8FVHpQOsI2V
-    Control.Monad.Trans.State.Lazy:     9806
 
 aeson_D4zMF1P1ZpsKMgz9HPiZU6
     Data.Aeson.Types.Instances:         4364
@@ -46,7 +41,6 @@ base
     Data.Either:                        397
     Data.Foldable:                      4789
     Data.Functor:                       108
-    Data.Functor.Identity:              1125
     Data.Maybe:                         1025
     Data.OldList:                       2095
     Data.Tuple:                         334
@@ -57,7 +51,7 @@ base
     Foreign.Marshal.Array:              2038
     Foreign.Storable:                   2680
     GHC.Arr:                            3667
-    GHC.Base:                           16615
+    GHC.Base:                           15903
     GHC.Conc.Sync:                      7822
     GHC.Enum:                           10262
     GHC.Err:                            218
@@ -82,7 +76,7 @@ base
     GHC.IO.Handle.Types:                3571
     GHC.IORef:                          166
     GHC.Int:                            802
-    GHC.List:                           18425
+    GHC.List:                           18818
     GHC.MVar:                           188
     GHC.Num:                            3347
     GHC.Ptr:                            188
@@ -97,18 +91,18 @@ base
 
 ghc-prim
     GHC.CString:                        4537
-    GHC.Classes:                        33425
+    GHC.Classes:                        32875
     GHC.IntWord64:                      146
     GHC.Tuple:                          802
     GHC.Types:                          1216
 
 ghcjs_7HDZUYLWu6O9tXZr0Fsvpn
-    Data.JSString:                      10204
-    Data.JSString.Internal.Type:        244
+    Data.JSString:                      10145
+    Data.JSString.Internal.Type:        242
     GHCJS.Foreign.Internal:             366
-    GHCJS.Internal.Types:               233
-    GHCJS.Marshal:                      8542
-    GHCJS.Marshal.Internal:             1098
+    GHCJS.Internal.Types:               231
+    GHCJS.Marshal:                      8467
+    GHCJS.Marshal.Internal:             1091
     GHCJS.Marshal.Pure:                 390
     JavaScript.Web.AnimationFrame:      962
 
@@ -118,10 +112,10 @@ integer-gmp
 
 main
     Init:                               19456
-    Main:                               48507
-    Solve:                              11101
+    Main:                               41630
+    Solve:                              5817
     Types:                              14724
-    Utilities:                          2179
+    Utilities:                          2181
 
 miso_CSCy35BTm867ouaMoBy3jV
     Miso:                               17599
@@ -133,15 +127,12 @@ miso_CSCy35BTm867ouaMoBy3jV
     Miso.FFI:                           10818
     Miso.Html.Element:                  2632
     Miso.Html.Event:                    1007
-    Miso.Html.Internal:                 26661
+    Miso.Html.Internal:                 26470
     Miso.Html.Property:                 2011
-    Miso.String:                        673
+    Miso.String:                        671
     Miso.Svg.Attribute:                 4024
     Miso.Svg.Element:                   2562
     Miso.Types:                         299
-
-mtl_CckdaCYdd9aDpmVp4fMiiy
-    Control.Monad.State.Class:          1542
 
 scien_4m62Psf9729KUEAP4gkY8C
     Data.Scientific:                    4919
@@ -160,5 +151,5 @@ vecto_DY6msUvqg3iJ5Ak1gSL0h2
 
 
 
-packed metadata: 213417
+packed metadata: 204308
 
