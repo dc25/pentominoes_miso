@@ -14,19 +14,19 @@ bounds p =
       cols = fmap snd coords
    in ((minimum rows, minimum cols), (maximum rows, maximum cols))
 
-translateLocation :: (Int, Int) -> Place -> Place
+translateLocation :: (Int, Int) -> Spot -> Spot
 translateLocation (vshift, hshift) loc =
   case loc of
     Location (row, col) -> Location (row + vshift, col + hshift)
     _ -> loc
 
-rotateLocation :: Place -> Place
+rotateLocation :: Spot -> Spot
 rotateLocation loc =
   case loc of
     Location (row, col) -> Location (col, -row)
     _ -> loc
 
-flipLocation :: Place -> Place
+flipLocation :: Spot -> Spot
 flipLocation loc =
   case loc of
     Location (row, col) -> Location (col, row)
@@ -41,7 +41,7 @@ rotatePiece p = DS.map rotateLocation p
 flipPiece :: Piece -> Piece
 flipPiece p = DS.map flipLocation p
 
-translations :: Set Place -> Piece -> [(Int, Int)]
+translations :: Set Spot -> Piece -> [(Int, Int)]
 translations board p = do
   let ((minRow, minCol), (maxRow, maxCol)) = bounds p
       ((minRowBoard, minColBoard), (maxRowBoard, maxColBoard)) = bounds board
@@ -75,7 +75,7 @@ fullPlacements board p0 =
 
    in nub placementsWithDuplicates
 
-allPlacements :: [Piece] -> Set Place -> Set Piece
+allPlacements :: [Piece] -> Set Spot -> Set Piece
 allPlacements pieces board = fromList $ concatMap (fullPlacements board) pieces
 
 nameToPiece :: [[Char]] -> Char -> Piece

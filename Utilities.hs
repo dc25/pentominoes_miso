@@ -4,11 +4,11 @@ import Data.Set as DS
 
 import Types
 
-isLocation :: Place -> Bool
+isLocation :: Spot -> Bool
 isLocation (Location _) = True
 isLocation (Name _) = False
 
-isName :: Place -> Bool
+isName :: Spot -> Bool
 isName = not . isLocation
 
 getName :: Piece -> Char
@@ -16,7 +16,7 @@ getName p =
   let Name ch = head $ toList $ DS.filter isName p
   in ch
 
-getLocation :: Place -> (Int, Int)
+getLocation :: Spot -> (Int, Int)
 getLocation (Location lo) = lo
 
 getLocations :: Piece -> [(Int, Int)]
