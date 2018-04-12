@@ -88,7 +88,7 @@ updateModel RequestStep model = noEff (model {stepRequested = True})
 updateModel (Time nTime) model@Model {..} = newModel <# (Time <$> Miso.now)
   where
     delta = nTime - time
-    (newSteps, newSolutions, newtime) = 
+    (newSteps, newSolutions, newTime) = 
         if      ((rate == Slow) && (delta < 400.0))
            ||   ((rate == Step) && (not stepRequested))
         then (steps, solutions, time)
@@ -105,7 +105,7 @@ updateModel (Time nTime) model@Model {..} = newModel <# (Time <$> Miso.now)
         
     newModel =
       model
-        { time = newtime -- change to newTime
+        { time = newTime 
         , steps = newSteps
         , solutions = newSolutions
         , stepRequested = False
