@@ -7,7 +7,6 @@ import Control.Monad.State
 import Data.Map as DM
 import qualified Data.Set as DS (null, empty)
 import Data.Maybe
-import Debug.Trace
 
 import Miso
 import qualified Miso.String as MST (ms)
@@ -18,8 +17,7 @@ import Utilities
 import Solve 
 
 data Action
-  = Init Double
-  | Time Double
+  = Time Double
   | SetRate Rate
   | RequestStep
   deriving (Show, Eq)
@@ -32,46 +30,21 @@ data Rate
 
 data Model = Model
   { time :: Double
-  , history :: History
+  , steps :: [Progress]
   , solutions :: [Progress]
   , w :: Int
   , h :: Int
   , rate :: Rate
   , stepRequested :: Bool
-  } deriving Eq
+  } 
+
+instance Eq Model where
+  _ == _ = False
 
 main :: IO ()
 main = do
-  let initialModel =
-        Model
-          { time = 0
-          , history = []
-          , solutions = []
-          , w = 0
-          , h = 0
-          , rate = Step
-          , stepRequested = False
-          }
   t <- Miso.now
-  Miso.startApp
-    Miso.App
-      { model = initialModel
-      , initialAction = Init t
-      , update = updateModel
-      , view = viewModel
-      , events = Miso.defaultEvents
-      , mountPoint = Nothing
-      , subs = []
-      }
-
-updateModel :: Action -> Model -> Miso.Effect Action Model
-
-updateModel (SetRate newRate) model = noEff (model {rate = newRate})
-
-updateModel RequestStep model = noEff (model {stepRequested = True})
-
-updateModel (Init newTime) model@Model {..} = newModel <# (Time <$> Miso.now)
-  where
+  let
     pieces =
       [ ['I', 'P', 'P', 'Y', 'Y', 'Y', 'Y', 'V', 'V', 'V']
       , ['I', 'P', 'P', 'X', 'Y', 'L', 'L', 'L', 'L', 'V']
@@ -85,37 +58,55 @@ updateModel (Init newTime) model@Model {..} = newModel <# (Time <$> Miso.now)
     newW = 1 + maximum (fmap snd board)
     newH = 1 + maximum (fmap fst board)
 
-    (_, newHistory) = runState (step0 board pieces) history
+  let initialModel =
+        Model
+          { time = 0
+          , steps = allSteps board pieces 
+          , solutions = []
+          , w = newW
+          , h = newH
+          , rate = Step
+          , stepRequested = False
+          }
+  Miso.startApp
+    Miso.App
+      { model = initialModel
+      , initialAction = Time t
+      , update = updateModel
+      , view = viewModel
+      , events = Miso.defaultEvents
+      , mountPoint = Nothing
+      , subs = []
+      }
 
-    newModel =
-      model
-        { time = newTime
-        , history = newHistory
-        , w = newW
-        , h = newH
-        }
+updateModel :: Action -> Model -> Miso.Effect Action Model
+
+updateModel (SetRate newRate) model = noEff (model {rate = newRate})
+
+updateModel RequestStep model = noEff (model {stepRequested = True})
 
 updateModel (Time nTime) model@Model {..} = newModel <# (Time <$> Miso.now)
   where
     delta = nTime - time
-    (newHistory, newSolutions, newtime) = 
+    (newSteps, newSolutions, newtime) = 
         if      ((rate == Slow) && (delta < 400.0))
            ||   ((rate == Step) && (not stepRequested))
-        then (history, solutions, time)
-        else (nHistory, nSolutions, nTime)
-             where (_, nHistory) = runState step history
-                   nProgress = head $ head nHistory
-                   -- if no spots remain uncovered then this progress is a solution
-                   -- so add it to the list of solutions.
-                   nSolutions =
-                     if (DS.null $ uncovered nProgress)
-                     then nProgress : solutions
-                     else solutions
+        then (steps, solutions, time)
+        else (nSteps, nSolutions, nTime)
+             where 
+               nSteps = tail steps
+               currentStep = head nSteps
+               -- if no spots remain uncovered, we have a solution
+               -- so add it to the list of solutions.
+               nSolutions =
+                 if (DS.null $ uncovered currentStep)
+                 then currentStep : solutions
+                 else solutions
         
     newModel =
       model
-        { time = newtime
-        , history = newHistory
+        { time = newtime -- change to newTime
+        , steps = newSteps
         , solutions = newSolutions
         , stepRequested = False
         }
@@ -124,10 +115,10 @@ viewModel :: Model -> Miso.View Action
 viewModel model@Model {..} =
   Miso.div_ []
     ( viewControls rate 
-    : viewProgress workCellSize w h (if ([] == history) then  Progress [] mempty DS.empty else (head $ head history))
+    : viewProgress  workCellSize w h (head steps)
     : fmap (viewProgress solutionCellSize w h) (Prelude.reverse solutions))
   where
-    workCellSize = 25
+    workCellSize = 30
     solutionCellSize = (workCellSize * 2) `div` 3
 
 viewControls :: Rate -> Miso.View Action

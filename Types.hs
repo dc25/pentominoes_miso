@@ -1,4 +1,4 @@
-module Types ( Place(..), Piece, Board, Progress(..), History ) where
+module Types ( Place(..), Piece, Board, Progress(..)) where
 
 import Data.Set 
 
@@ -15,6 +15,3 @@ data Progress = Progress { used :: [Piece]
                      , uncovered :: Board
                      , unused :: Set Piece
                      } deriving (Eq, Show)
-
-type History = [[Progress]]
-

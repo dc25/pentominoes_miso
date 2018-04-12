@@ -5,10 +5,8 @@ import Data.Set as DS
 import Types
 
 isLocation :: Place -> Bool
-isLocation pl =
-  case pl of
-    Location coords -> True
-    Name _ -> False
+isLocation (Location _) = True
+isLocation (Name _) = False
 
 isName :: Place -> Bool
 isName = not . isLocation
@@ -19,9 +17,7 @@ getName p =
   in ch
 
 getLocation :: Place -> (Int, Int)
-getLocation pl =
-  let Location lo = pl
-  in lo
+getLocation (Location lo) = lo
 
 getLocations :: Piece -> [(Int, Int)]
 getLocations = fmap getLocation . toList . DS.filter isLocation

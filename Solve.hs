@@ -1,6 +1,6 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 
-module Solve ( step0 , step , solve0, solve0b) where
+module Solve ( allSteps, solve) where
 
 import Control.Monad.State
 import qualified Data.List as DL (nub)
@@ -33,44 +33,12 @@ next (Progress used uncovered unused) = do
 
   return $ Progress newPiecesUsed newUncovered newUnused
 
-solve :: Progress -> [ Progress ]
-solve progress = do
-  if (DS.null $ uncovered progress) -- no space left (solved)
-  then return progress
-  else solve =<< next progress
-
-solve0 :: [(Int, Int)] -> [[Char]] -> [Progress]
-solve0 squares image = 
-  solve $ initialProgress squares image
-
-solve0b :: [(Int, Int)] -> [[Char]] -> [Progress]
-solve0b squares image = 
+allSteps :: [(Int, Int)] -> [[Char]] -> [Progress]
+allSteps squares image = 
   let ip = initialProgress squares image
-      progressTree = unfoldTree (\p -> (p, next p)) ip
-  in Prelude.filter ((DS.null) . uncovered ) $ flatten progressTree
+  in flatten $ unfoldTree (\p -> (p, next p)) ip
 
-pop2 :: [[a]] -> [[a]]
-pop2 xss =
-  case xss of
-    [_]:xs -> pop2 xs
-    (_:ts):xs -> ts : xs
-    _ -> xss -- should not happen
+solve :: [(Int, Int)] -> [[Char]] -> [Progress]
+solve squares image = 
+  Prelude.filter ((DS.null) . uncovered ) $ allSteps squares image
 
-step :: State History Progress
-step = do
-  history <- get
-  let newOptions = next $ head $ head history
-
-      newHistory = 
-          if newOptions == []
-          then pop2 history
-          else newOptions : history
-
-  put newHistory
-  return $ head $ head $ newHistory
-
-step0 :: [(Int, Int)] -> [[Char]] -> State History Progress
-step0 squares image = do
-  let progress = initialProgress squares image
-  put [[progress]]
-  return progress
