@@ -1,13 +1,15 @@
-module Solve ( allSteps, solve) where
+module Solve ( steps, solutions, Progress(..) ) where
 
 import Control.Monad
 import Data.Set as DS 
 import Data.Tree
 
-import Types
-import Init
+data Progress a = Progress { used :: [Set a]
+                           , uncovered :: Set a
+                           , unused :: Set (Set a)
+                           } 
 
-next :: Progress -> [Progress]
+next :: Ord a => Progress a -> [Progress a]
 next (Progress used uncovered unused) = do
   guard (not $  DS.null uncovered) -- no uncovered space left (solved)
 
@@ -30,12 +32,11 @@ next (Progress used uncovered unused) = do
 
   return $ Progress newPiecesUsed newUncovered newUnused
 
-allSteps :: [(Int, Int)] -> [[Char]] -> [Progress]
-allSteps squares image = 
-  let ip = initialProgress squares image
-  in flatten $ unfoldTree (\p -> (p, next p)) ip
+steps :: Ord a => Progress a -> [Progress a]
+steps initial = 
+  flatten $ unfoldTree (\p -> (p, next p)) initial
 
-solve :: [(Int, Int)] -> [[Char]] -> [Progress]
-solve squares image = 
-  Prelude.filter (DS.null . uncovered ) $ allSteps squares image
+solutions :: Ord a => Progress a -> [Progress a]
+solutions initial = 
+  Prelude.filter (DS.null . uncovered ) $ steps initial
 

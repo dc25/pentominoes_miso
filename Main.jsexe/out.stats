@@ -2,14 +2,14 @@ code size summary per package:
 
 AHOOhHjGLItBYmDB2lAxxO:  826
 DfpZFnZR7Sa7Y07uHwVn10:  10227
-KQpEOkJjX9qJTwsO87bqLg:  211792
+KQpEOkJjX9qJTwsO87bqLg:  208539
 aeson_D4zMF1P1ZpsKMgz9HPiZU6:20876
-base:                    486056
-ghc-prim:                39576
+base:                    484834
+ghc-prim:                38856
 ghcjs_7HDZUYLWu6O9tXZr0Fsvpn:21894
 integer-gmp:             24088
-main:                    83784
-miso_CSCy35BTm867ouaMoBy3jV:95373
+main:                    78246
+miso_CSCy35BTm867ouaMoBy3jV:95234
 scien_4m62Psf9729KUEAP4gkY8C:4919
 text_DfPPBlezQfj0WJcyB3QXey:1951
 unord_34NWiEgrMCw8NUnSnAxkhV:3821
@@ -28,7 +28,7 @@ DfpZFnZR7Sa7Y07uHwVn10
 KQpEOkJjX9qJTwsO87bqLg
     Data.Map.Base:                      55948
     Data.Sequence:                      37067
-    Data.Set.Base:                      115751
+    Data.Set.Base:                      112498
     Data.Tree:                          3026
 
 aeson_D4zMF1P1ZpsKMgz9HPiZU6
@@ -83,7 +83,7 @@ base
     GHC.Real:                           23789
     GHC.ST:                             186
     GHC.STRef:                          194
-    GHC.Show:                           23082
+    GHC.Show:                           21860
     GHC.Storable:                       1084
     GHC.TopHandler:                     10349
     GHC.Word:                           350
@@ -91,7 +91,7 @@ base
 
 ghc-prim
     GHC.CString:                        4537
-    GHC.Classes:                        32875
+    GHC.Classes:                        32155
     GHC.IntWord64:                      146
     GHC.Tuple:                          802
     GHC.Types:                          1216
@@ -111,10 +111,10 @@ integer-gmp
     GHC.Integer.Type:                   23755
 
 main
-    Init:                               19445
-    Main:                               41630
-    Solve:                              5811
-    Types:                              14717
+    Init:                               19300
+    Main:                               41786
+    Solve:                              6714
+    Types:                              8265
     Utilities:                          2181
 
 miso_CSCy35BTm867ouaMoBy3jV
@@ -123,11 +123,11 @@ miso_CSCy35BTm867ouaMoBy3jV
     Miso.Diff:                          2619
     Miso.Effect:                        741
     Miso.Event.Decoder:                 921
-    Miso.Event.Types:                   21753
-    Miso.FFI:                           10818
+    Miso.Event.Types:                   21720
+    Miso.FFI:                           10721
     Miso.Html.Element:                  2632
-    Miso.Html.Event:                    1007
-    Miso.Html.Internal:                 26470
+    Miso.Html.Event:                    1003
+    Miso.Html.Internal:                 26465
     Miso.Html.Property:                 2011
     Miso.String:                        671
     Miso.Svg.Attribute:                 4024
@@ -151,5 +151,5 @@ vecto_DY6msUvqg3iJ5Ak1gSL0h2
 
 
 
-packed metadata: 204305
+packed metadata: 201338
 

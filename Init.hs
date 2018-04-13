@@ -4,6 +4,7 @@ import Data.List
 import Data.Set as DS
 
 import Types
+import Solve
 import Utilities
 
 bounds :: Piece -> ((Int, Int), (Int, Int))
@@ -41,7 +42,7 @@ rotatePiece p = DS.map rotateSpot p
 flipPiece :: Piece -> Piece
 flipPiece p = DS.map flipSpot p
 
-translations :: Set Spot -> Piece -> [(Int, Int)]
+translations :: Board -> Piece -> [(Int, Int)]
 translations board p = do
   let ((minRow, minCol), (maxRow, maxCol)) = bounds p
       ((minRowBoard, minColBoard), (maxRowBoard, maxColBoard)) = bounds board
@@ -49,11 +50,13 @@ translations board p = do
   ht <- [minColBoard - maxCol .. maxColBoard - minCol]
   return (vt, ht)
 
+placements :: Board -> Piece -> [Piece]
 placements board p =
   Prelude.filter
     (`isSubsetOf` board)
     (fmap (translatePiece p) (translations board p))
 
+fullPlacements :: Board -> Piece -> [Piece]
 fullPlacements board p0 =
   let p1 = rotatePiece p0
       p2 = rotatePiece p1
@@ -78,8 +81,8 @@ fullPlacements board p0 =
 -- Given a list of pieces and a board (Set of Spots) construct the
 -- set of all placements on the board of translations and rotations 
 -- of the pieces, 
-allPlacements :: [Piece] -> Set Spot -> Set Piece
-allPlacements pieces board = fromList $ concatMap (fullPlacements board) pieces
+allPlacements :: Board -> [Piece] -> Set Piece
+allPlacements board pieces = fromList $ concatMap (fullPlacements board) pieces
 
 -- Given an image (list of lists) of a bunch of piece names (chars) and 
 -- the name of a particular piece, construct the Piece (a Set of Spots) .
@@ -90,7 +93,7 @@ nameToPiece image name =
       pieceCoords = Prelude.filter (\((r, c), n) -> n == name) indexed
   in fromList $ Name name : ((Location . fst) <$> pieceCoords)
 
-initialProgress :: [(Int, Int)] -> [[Char]] -> Progress
+initialProgress :: [(Int, Int)] -> [[Char]] -> Progress Spot
 initialProgress squares image = 
   let -- gather the names
       names = nub $ concat image
@@ -102,6 +105,6 @@ initialProgress squares image =
       emptyBoard = fromList $ fmap Name names ++ fmap Location squares
 
       -- gather all possible placements of the pieces on the board.
-      placements = allPlacements pieces emptyBoard
+      placements = allPlacements emptyBoard pieces 
   in Progress [] emptyBoard placements
 

@@ -1,4 +1,4 @@
-module Types ( Spot(..), Piece, Board, Progress(..)) where
+module Types (Spot(..), Piece, Board) where
 
 import Data.Set 
 
@@ -11,7 +11,3 @@ type Piece = Set Spot
 
 type Board = Set Spot
 
-data Progress = Progress { used :: [Piece]
-                     , uncovered :: Board
-                     , unused :: Set Piece
-                     } deriving (Eq, Show)

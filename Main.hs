@@ -11,9 +11,10 @@ import Miso
 import qualified Miso.String as MST (ms)
 import qualified Miso.Svg as MSV ( g_ , height_ , rect_ , svg_ , transform_ , version_ , width_ , x_ , y_, style_)
 
+import Init
 import Types 
 import Utilities
-import Solve 
+import Solve (steps, Progress(..))
 
 data Action
   = Time Double
@@ -29,8 +30,8 @@ data Rate
 
 data Model = Model
   { time :: Double
-  , steps :: [Progress]
-  , solutions :: [Progress]
+  , steps :: [Progress Spot]
+  , solutions :: [Progress Spot]
   , w :: Int
   , h :: Int
   , rate :: Rate
@@ -57,10 +58,12 @@ main = do
     newW = 1 + maximum (fmap snd board)
     newH = 1 + maximum (fmap fst board)
 
-  let initialModel =
+    initial = initialProgress board pieces
+
+    initialModel =
         Model
           { time = 0
-          , steps = allSteps board pieces 
+          , steps = Solve.steps initial
           , solutions = []
           , w = newW
           , h = newH
@@ -105,7 +108,7 @@ updateModel (Time nTime) model@Model {..} = newModel <# (Time <$> now)
     newModel =
       model
         { time = newTime 
-        , steps = newSteps
+        , Main.steps = newSteps
         , solutions = newSolutions
         , stepRequested = False
         }
@@ -117,7 +120,7 @@ viewModel Model {..} =
     : viewProgress  workCellSize w h (head steps)
     : fmap (viewProgress solutionCellSize w h) (reverse solutions))
   where
-    workCellSize = 36
+    workCellSize = 20
     solutionCellSize = (workCellSize * 2) `div` 3
 
 viewControls :: Rate -> View Action
@@ -129,7 +132,7 @@ viewControls rate =
      ] ++ [button_ [onClick RequestStep] [text "Step"] | rate == Step]
     )
 
-viewProgress :: Int -> Int -> Int -> Progress -> View Action
+viewProgress :: Int -> Int -> Int -> Progress Spot -> View Action
 viewProgress cellSize width height (Progress pieces _ _) =
   div_
     []
