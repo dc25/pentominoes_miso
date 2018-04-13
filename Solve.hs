@@ -37,5 +37,5 @@ allSteps squares image =
 
 solve :: [(Int, Int)] -> [[Char]] -> [Progress]
 solve squares image = 
-  Prelude.filter ((DS.null) . uncovered ) $ allSteps squares image
+  Prelude.filter (DS.null . uncovered ) $ allSteps squares image
 

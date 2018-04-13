@@ -3,13 +3,13 @@
 
 module Main where
 
-import Data.Map as DM
+import Data.Map as DM (lookup, fromList)
 import qualified Data.Set as DS (null)
 import Data.Maybe
 
 import Miso
 import qualified Miso.String as MST (ms)
-import qualified Miso.Svg as MSV ( g_ , height_ , rect_ , style_ , svg_ , transform_ , version_ , width_ , x_ , y_)
+import qualified Miso.Svg as MSV ( g_ , height_ , rect_ , svg_ , transform_ , version_ , width_ , x_ , y_, style_)
 
 import Types 
 import Utilities
@@ -42,7 +42,7 @@ instance Eq Model where
 
 main :: IO ()
 main = do
-  t <- Miso.now
+  t <- now
   let
     pieces =
       [ ['I', 'P', 'P', 'Y', 'Y', 'Y', 'Y', 'V', 'V', 'V']
@@ -67,24 +67,24 @@ main = do
           , rate = Step
           , stepRequested = False
           }
-  Miso.startApp
-    Miso.App
+  startApp
+    App
       { model = initialModel
       , initialAction = Time t
       , update = updateModel
       , view = viewModel
-      , events = Miso.defaultEvents
+      , events = defaultEvents
       , mountPoint = Nothing
       , subs = []
       }
 
-updateModel :: Action -> Model -> Miso.Effect Action Model
+updateModel :: Action -> Model -> Effect Action Model
 
 updateModel (SetRate newRate) model = noEff (model {rate = newRate})
 
 updateModel RequestStep model = noEff (model {stepRequested = True})
 
-updateModel (Time nTime) model@Model {..} = newModel <# (Time <$> Miso.now)
+updateModel (Time nTime) model@Model {..} = newModel <# (Time <$> now)
   where
     delta = nTime - time
     (newSteps, newSolutions, newTime) = 
@@ -110,17 +110,17 @@ updateModel (Time nTime) model@Model {..} = newModel <# (Time <$> Miso.now)
         , stepRequested = False
         }
 
-viewModel :: Model -> Miso.View Action
-viewModel model@Model {..} =
-  Miso.div_ []
+viewModel :: Model -> View Action
+viewModel Model {..} =
+  div_ []
     ( viewControls rate 
     : viewProgress  workCellSize w h (head steps)
-    : fmap (viewProgress solutionCellSize w h) (Prelude.reverse solutions))
+    : fmap (viewProgress solutionCellSize w h) (reverse solutions))
   where
     workCellSize = 36
     solutionCellSize = (workCellSize * 2) `div` 3
 
-viewControls :: Rate -> Miso.View Action
+viewControls :: Rate -> View Action
 viewControls rate =
   div_ []
     ([ input_ [ type_ "radio" , name_ "updateRate" , checked_ (rate == Fast) , onClick (SetRate Fast) ] [] , text "Fast"
@@ -129,7 +129,7 @@ viewControls rate =
      ] ++ [button_ [onClick RequestStep] [text "Step"] | rate == Step]
     )
 
-viewProgress :: Int -> Int -> Int -> Progress -> Miso.View Action
+viewProgress :: Int -> Int -> Int -> Progress -> View Action
 viewProgress cellSize width height (Progress pieces _ _) =
   div_
     []
@@ -138,16 +138,16 @@ viewProgress cellSize width height (Progress pieces _ _) =
         , MSV.width_ (MST.ms $ show (width * cellSize))
         , MSV.height_ (MST.ms $ show (height * cellSize))
         ]
-        (Prelude.concatMap (showPiece cellSize) pieces)
+        (concatMap (showPiece cellSize) pieces)
     ]
 
-showPiece :: Int -> Piece -> [Miso.View Action]
+showPiece :: Int -> Piece -> [View Action]
 showPiece cellSize p =
   let name = getName p
       locations = getLocations p
   in fmap (showCell cellSize (getColor name)) locations
 
-showCell :: Int -> String -> (Int, Int) -> Miso.View Action
+showCell :: Int -> String -> (Int, Int) -> View Action
 showCell cellSize color (row, col) =
   MSV.g_
     [ MSV.transform_
@@ -158,7 +158,11 @@ showCell cellSize color (row, col) =
         , MSV.y_ "0.05"
         , MSV.width_ "0.9"
         , MSV.height_ "0.9"
+
+          -- Couldn't get MSV.style_ to work so using Miso.style_ instead
+          -- which seems to do the trick.
         , Miso.style_ $ fromList [("fill", MST.ms color)]
+
         ]
         []
     ]
