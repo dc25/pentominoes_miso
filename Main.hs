@@ -16,16 +16,16 @@ import Types
 import Utilities
 import Solve (steps, Progress(..))
 
-data Action
-  = Time Double
-  | SetRate Rate
-  | RequestStep
-  deriving (Show, Eq)
-
 data Rate
   = Fast
   | Slow
   | Step
+  deriving (Show, Eq)
+
+data Action
+  = Time Double
+  | SetRate Rate
+  | RequestStep
   deriving (Show, Eq)
 
 data Model = Model
