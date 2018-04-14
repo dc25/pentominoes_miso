@@ -7,14 +7,6 @@ import Types
 import Solve
 import Utilities
 
-bounds :: Piece -> ((Int, Int), (Int, Int))
-bounds p =
-  let locations = DS.filter isLocation p
-      coords = (\(Location (row, col)) -> (row, col)) <$> toList locations
-      rows = fmap fst coords
-      cols = fmap snd coords
-   in ((minimum rows, minimum cols), (maximum rows, maximum cols))
-
 translateSpot :: (Int, Int) -> Spot -> Spot
 translateSpot (vshift, hshift) loc =
   case loc of

@@ -1,4 +1,4 @@
-module Utilities ( isLocation, isName, getName, getLocation, getLocations) where
+module Utilities ( isLocation, isName, getName, getLocation, getLocations, bounds) where
 
 import Data.Set as DS
 
@@ -21,3 +21,12 @@ getLocation (Location lo) = lo
 
 getLocations :: Piece -> [(Int, Int)]
 getLocations = fmap getLocation . toList . DS.filter isLocation
+
+bounds :: Set Spot -> ((Int, Int), (Int, Int))
+bounds p =
+  let locations = DS.filter isLocation p
+      coords = (\(Location (row, col)) -> (row, col)) <$> toList locations
+      rows = fmap fst coords
+      cols = fmap snd coords
+   in ((minimum rows, minimum cols), (maximum rows, maximum cols))
+

@@ -4,7 +4,7 @@
 module Main where
 
 import Data.Map as DM (lookup, fromList)
-import qualified Data.Set as DS (null)
+import qualified Data.Set as DS (null, unions)
 import Data.Maybe
 
 import Miso
@@ -32,12 +32,15 @@ data Model = Model
   { time :: Double
   , steps :: [Progress Spot]
   , solutions :: [Progress Spot]
-  , w :: Int
-  , h :: Int
   , rate :: Rate
   , stepRequested :: Bool
   } 
 
+-- Model comparision using derived Eq runs the risk 
+-- of comparing long lists of steps which causes app 
+-- to freeze.  Model comparison is only used to 
+-- prevent unnecessary view refreshes so, worst case, 
+-- this may result in more DOM comparision. 
 instance Eq Model where
   _ == _ = False
 
@@ -53,20 +56,13 @@ main = do
       , ['I', 'T', 'W', 'W', 'N', 'N', 'F', 'Z', 'Z', 'U']
       , ['T', 'T', 'T', 'W', 'W', 'N', 'N', 'N', 'U', 'U']
       ]
-    board = [(row, col) | row <- [0 .. 11], col <- [0 .. 4]]
-
-    newW = 1 + maximum (fmap snd board)
-    newH = 1 + maximum (fmap fst board)
-
-    initial = initialProgress board pieces
+    board = [(row, col) | row <- [0 .. 5], col <- [0 .. 9]]
 
     initialModel =
         Model
           { time = 0
-          , steps = Solve.steps initial
+          , steps = Solve.steps $ initialProgress board pieces
           , solutions = []
-          , w = newW
-          , h = newH
           , rate = Step
           , stepRequested = False
           }
@@ -87,7 +83,7 @@ updateModel (SetRate newRate) model = noEff (model {rate = newRate})
 
 updateModel RequestStep model = noEff (model {stepRequested = True})
 
-updateModel (Time nTime) model@Model {..} = newModel <# (Time <$> now)
+updateModel (Time nTime) model@Model {..} = Effect newModel [(Time <$> now)]
   where
     delta = nTime - time
     (newSteps, newSolutions, newTime) = 
@@ -117,10 +113,15 @@ viewModel :: Model -> View Action
 viewModel Model {..} =
   div_ []
     ( viewControls rate 
-    : viewProgress  workCellSize w h (head steps)
+    : viewProgress  workCellSize w h thisStep
     : fmap (viewProgress solutionCellSize w h) (reverse solutions))
   where
-    workCellSize = 20
+    thisStep = head steps
+    spots = DS.unions (uncovered thisStep : used thisStep)
+    ((rMin, cMin), (rMax, cMax)) = bounds spots
+    w = 1 + cMax - cMin 
+    h = 1 + rMax - rMin 
+    workCellSize = 40
     solutionCellSize = (workCellSize * 2) `div` 3
 
 viewControls :: Rate -> View Action
