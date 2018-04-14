@@ -11,15 +11,16 @@ data Progress a = Progress { used :: [Set a]
 
 next :: Ord a => Progress a -> [Progress a]
 next (Progress used uncovered unused) = do
-  guard (not $  DS.null uncovered) -- no uncovered space left (solved)
+  guard (not $  DS.null uncovered) -- no uncovered space left; solved
 
   -- find the spot with the least number of unused pieces containing it.
-  let spot = findMin $ DS.map (\loc -> (length $ DS.filter (member loc) unused, loc)) uncovered
+  let coverageCounts = DS.map (\loc -> (length $ DS.filter (member loc) unused, loc)) uncovered
+      (minCount, minCountElement) = findMin coverageCounts
 
-  guard (fst spot > 0) -- nothing goes here; failed
+  guard (minCount > 0) -- nothing goes here; failed
 
   -- get each unused piece that covers this spot
-  ns <- toList $ DS.filter (member $ snd spot) unused
+  ns <- toList $ DS.filter (member $ minCountElement) unused
 
   let -- remove the spots covered by this piece from the board
       newUncovered = uncovered \\ ns
@@ -28,9 +29,9 @@ next (Progress used uncovered unused) = do
       newUnused = DS.filter (DS.null . intersection ns) unused
 
       -- add the piece to the solution being built up.
-      newPiecesUsed = ns : used
+      newUsed = ns : used
 
-  return $ Progress newPiecesUsed newUncovered newUnused
+  return $ Progress newUsed newUncovered newUnused
 
 steps :: Ord a => Progress a -> [Progress a]
 steps initial = 

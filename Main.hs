@@ -116,7 +116,7 @@ viewModel Model {..} =
     : viewProgress  workCellSize (head steps)
     : fmap (viewProgress solutionCellSize) (reverse solutions))
   where
-    workCellSize = 36
+    workCellSize = 30
     solutionCellSize = (workCellSize * 2) `div` 3
 
 viewControls :: Rate -> View Action
