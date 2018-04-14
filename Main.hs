@@ -8,7 +8,7 @@ import qualified Data.Set as DS (null, unions)
 import Data.Maybe
 
 import Miso
-import Miso.String (ms, MisoString)
+import Miso.String (ms, MisoString, append)
 import qualified Miso.Svg as MSV ( g_ , height_ , rect_ , svg_ , transform_ , version_ , width_ , x_ , y_, style_)
 
 import Init
@@ -20,13 +20,13 @@ data Rate
   = Fast
   | Slow
   | Step
-  deriving (Show, Eq)
+  deriving (Eq)
 
 data Action
   = Time Double
   | SetRate Rate
   | RequestStep
-  deriving (Show, Eq)
+  deriving (Eq)
 
 data Model = Model
   { time :: Double
@@ -134,8 +134,8 @@ viewProgress cellSize (Progress used uncovered _) =
     []
     [ MSV.svg_
         [ MSV.version_ "1.1"
-        , MSV.width_ (ms $ show (w * cellSize))
-        , MSV.height_ (ms $ show (h * cellSize))
+        , MSV.width_ (ms (w * cellSize))
+        , MSV.height_ (ms (h * cellSize))
         ]
         (concatMap (showPiece cellSize) used)
     ]
@@ -154,8 +154,7 @@ showPiece cellSize p =
 showCell :: Int -> MisoString -> (Int, Int) -> View Action
 showCell cellSize color (row, col) =
   MSV.g_
-    [ MSV.transform_
-        (ms $ "scale (" ++ scale ++ ", " ++ scale ++ ") " ++ "translate (" ++ show col ++ ", " ++ show row ++ ") ")
+    [ MSV.transform_ $ scaleTransform `append` translateTransform
     ]
     [ MSV.rect_
         [ MSV.x_ "0.05"
@@ -163,14 +162,15 @@ showCell cellSize color (row, col) =
         , MSV.width_ "0.9"
         , MSV.height_ "0.9"
 
-          -- Couldn't get MSV.style_ to work so using Miso.style_ instead
-          -- which seems to do the trick.
-        , Miso.style_ $ fromList [("fill", ms color)]
+          -- Couldn't get MSV.style_ to work so using Miso.style_ 
+        , Miso.style_ $ fromList [("fill", color)]
         ]
         []
     ]
   where
-    scale = show cellSize
+    scale = ms cellSize
+    scaleTransform = "scale (" `append` scale `append` ", " `append` scale `append` ") " 
+    translateTransform = "translate (" `append` ms col `append` ", " `append` ms row `append` ") "
 
 getColor :: Char -> MisoString
 getColor name =
