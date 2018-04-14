@@ -2,14 +2,14 @@ code size summary per package:
 
 AHOOhHjGLItBYmDB2lAxxO:  826
 DfpZFnZR7Sa7Y07uHwVn10:  10227
-KQpEOkJjX9qJTwsO87bqLg:  208539
+KQpEOkJjX9qJTwsO87bqLg:  218130
 aeson_D4zMF1P1ZpsKMgz9HPiZU6:20876
 base:                    484834
 ghc-prim:                38856
 ghcjs_7HDZUYLWu6O9tXZr0Fsvpn:21894
 integer-gmp:             24088
-main:                    78246
-miso_CSCy35BTm867ouaMoBy3jV:95234
+main:                    79378
+miso_CSCy35BTm867ouaMoBy3jV:94858
 scien_4m62Psf9729KUEAP4gkY8C:4919
 text_DfPPBlezQfj0WJcyB3QXey:1951
 unord_34NWiEgrMCw8NUnSnAxkhV:3821
@@ -28,7 +28,7 @@ DfpZFnZR7Sa7Y07uHwVn10
 KQpEOkJjX9qJTwsO87bqLg
     Data.Map.Base:                      55948
     Data.Sequence:                      37067
-    Data.Set.Base:                      112498
+    Data.Set.Base:                      122089
     Data.Tree:                          3026
 
 aeson_D4zMF1P1ZpsKMgz9HPiZU6
@@ -111,20 +111,20 @@ integer-gmp
     GHC.Integer.Type:                   23755
 
 main
-    Init:                               19300
-    Main:                               41786
+    Init:                               16994
+    Main:                               42841
     Solve:                              6714
     Types:                              8265
-    Utilities:                          2181
+    Utilities:                          4564
 
 miso_CSCy35BTm867ouaMoBy3jV
     Miso:                               17599
     Miso.Delegate:                      1246
     Miso.Diff:                          2619
-    Miso.Effect:                        741
+    Miso.Effect:                        281
     Miso.Event.Decoder:                 921
-    Miso.Event.Types:                   21720
-    Miso.FFI:                           10721
+    Miso.Event.Types:                   21753
+    Miso.FFI:                           10772
     Miso.Html.Element:                  2632
     Miso.Html.Event:                    1003
     Miso.Html.Internal:                 26465
@@ -151,5 +151,5 @@ vecto_DY6msUvqg3iJ5Ak1gSL0h2
 
 
 
-packed metadata: 201338
+packed metadata: 202010
 

@@ -79,9 +79,9 @@ main = do
 
 updateModel :: Action -> Model -> Effect Action Model
 
-updateModel (SetRate newRate) model = noEff (model {rate = newRate})
+updateModel (SetRate newRate) model = Effect (model {rate = newRate}) []
 
-updateModel RequestStep model = noEff (model {stepRequested = True})
+updateModel RequestStep model = Effect (model {stepRequested = True}) []
 
 updateModel (Time nTime) model@Model {..} = Effect newModel [(Time <$> now)]
   where
@@ -166,7 +166,6 @@ showCell cellSize color (row, col) =
           -- Couldn't get MSV.style_ to work so using Miso.style_ instead
           -- which seems to do the trick.
         , Miso.style_ $ fromList [("fill", ms color)]
-
         ]
         []
     ]
