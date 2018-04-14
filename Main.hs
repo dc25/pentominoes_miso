@@ -8,7 +8,7 @@ import qualified Data.Set as DS (null, unions)
 import Data.Maybe
 
 import Miso
-import qualified Miso.String as MST (ms)
+import Miso.String (ms)
 import qualified Miso.Svg as MSV ( g_ , height_ , rect_ , svg_ , transform_ , version_ , width_ , x_ , y_, style_)
 
 import Init
@@ -56,7 +56,7 @@ main = do
       , ['I', 'T', 'W', 'W', 'N', 'N', 'F', 'Z', 'Z', 'U']
       , ['T', 'T', 'T', 'W', 'W', 'N', 'N', 'N', 'U', 'U']
       ]
-    board = [(row, col) | row <- [0 .. 5], col <- [0 .. 9]]
+    board = [(row, col) | row <- [0 .. 11], col <- [0 .. 4]]
 
     initialModel =
         Model
@@ -113,14 +113,9 @@ viewModel :: Model -> View Action
 viewModel Model {..} =
   div_ []
     ( viewControls rate 
-    : viewProgress  workCellSize w h thisStep
-    : fmap (viewProgress solutionCellSize w h) (reverse solutions))
+    : viewProgress  workCellSize (head steps)
+    : fmap (viewProgress solutionCellSize) (reverse solutions))
   where
-    thisStep = head steps
-    spots = DS.unions (uncovered thisStep : used thisStep)
-    ((rMin, cMin), (rMax, cMax)) = bounds spots
-    w = 1 + cMax - cMin 
-    h = 1 + rMax - rMin 
     workCellSize = 40
     solutionCellSize = (workCellSize * 2) `div` 3
 
@@ -133,17 +128,22 @@ viewControls rate =
      ] ++ [button_ [onClick RequestStep] [text "Step"] | rate == Step]
     )
 
-viewProgress :: Int -> Int -> Int -> Progress Spot -> View Action
-viewProgress cellSize width height (Progress pieces _ _) =
+viewProgress :: Int -> Progress Spot -> View Action
+viewProgress cellSize (Progress used uncovered _) =
   div_
     []
     [ MSV.svg_
         [ MSV.version_ "1.1"
-        , MSV.width_ (MST.ms $ show (width * cellSize))
-        , MSV.height_ (MST.ms $ show (height * cellSize))
+        , MSV.width_ (ms $ show (w * cellSize))
+        , MSV.height_ (ms $ show (h * cellSize))
         ]
-        (concatMap (showPiece cellSize) pieces)
+        (concatMap (showPiece cellSize) used)
     ]
+  where
+    spots = DS.unions (uncovered : used)
+    ((rMin, cMin), (rMax, cMax)) = bounds spots
+    w = 1 + cMax - cMin 
+    h = 1 + rMax - rMin 
 
 showPiece :: Int -> Piece -> [View Action]
 showPiece cellSize p =
@@ -155,7 +155,7 @@ showCell :: Int -> String -> (Int, Int) -> View Action
 showCell cellSize color (row, col) =
   MSV.g_
     [ MSV.transform_
-        (MST.ms $ "scale (" ++ scale ++ ", " ++ scale ++ ") " ++ "translate (" ++ show col ++ ", " ++ show row ++ ") ")
+        (ms $ "scale (" ++ scale ++ ", " ++ scale ++ ") " ++ "translate (" ++ show col ++ ", " ++ show row ++ ") ")
     ]
     [ MSV.rect_
         [ MSV.x_ "0.05"
@@ -165,7 +165,7 @@ showCell cellSize color (row, col) =
 
           -- Couldn't get MSV.style_ to work so using Miso.style_ instead
           -- which seems to do the trick.
-        , Miso.style_ $ fromList [("fill", MST.ms color)]
+        , Miso.style_ $ fromList [("fill", ms color)]
 
         ]
         []
