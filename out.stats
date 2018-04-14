@@ -4,16 +4,16 @@ AHOOhHjGLItBYmDB2lAxxO:  826
 DfpZFnZR7Sa7Y07uHwVn10:  10227
 KQpEOkJjX9qJTwsO87bqLg:  218130
 aeson_D4zMF1P1ZpsKMgz9HPiZU6:20876
-base:                    484834
+base:                    429404
 ghc-prim:                38856
-ghcjs_7HDZUYLWu6O9tXZr0Fsvpn:21894
+ghcjs_7HDZUYLWu6O9tXZr0Fsvpn:22043
 integer-gmp:             24088
-main:                    81504
-miso_CSCy35BTm867ouaMoBy3jV:94884
-scien_4m62Psf9729KUEAP4gkY8C:4919
-text_DfPPBlezQfj0WJcyB3QXey:1951
-unord_34NWiEgrMCw8NUnSnAxkhV:3821
-vecto_DY6msUvqg3iJ5Ak1gSL0h2:2041
+main:                    78908
+miso_CSCy35BTm867ouaMoBy3jV:94803
+scien_4m62Psf9729KUEAP4gkY8C:4872
+text_DfPPBlezQfj0WJcyB3QXey:1943
+unord_34NWiEgrMCw8NUnSnAxkhV:3805
+vecto_DY6msUvqg3iJ5Ak1gSL0h2:2027
 
 
 code size per module:
@@ -56,7 +56,7 @@ base
     GHC.Enum:                           10262
     GHC.Err:                            218
     GHC.Exception:                      6644
-    GHC.Float:                          128005
+    GHC.Float:                          77428
     GHC.Float.ConversionUtils:          3383
     GHC.Foreign:                        12136
     GHC.ForeignPtr:                     1265
@@ -76,14 +76,14 @@ base
     GHC.IO.Handle.Types:                3571
     GHC.IORef:                          166
     GHC.Int:                            802
-    GHC.List:                           18818
+    GHC.List:                           16124
     GHC.MVar:                           188
     GHC.Num:                            3347
     GHC.Ptr:                            188
-    GHC.Real:                           23789
+    GHC.Real:                           23523
     GHC.ST:                             186
     GHC.STRef:                          194
-    GHC.Show:                           21860
+    GHC.Show:                           19967
     GHC.Storable:                       1084
     GHC.TopHandler:                     10349
     GHC.Word:                           350
@@ -97,7 +97,8 @@ ghc-prim
     GHC.Types:                          1216
 
 ghcjs_7HDZUYLWu6O9tXZr0Fsvpn
-    Data.JSString:                      10145
+    Data.JSString:                      9836
+    Data.JSString.Int:                  458
     Data.JSString.Internal.Type:        242
     GHCJS.Foreign.Internal:             366
     GHCJS.Internal.Types:               231
@@ -112,44 +113,44 @@ integer-gmp
 
 main
     Init:                               16994
-    Main:                               44967
+    Main:                               42371
     Solve:                              6714
     Types:                              8265
     Utilities:                          4564
 
 miso_CSCy35BTm867ouaMoBy3jV
-    Miso:                               17599
-    Miso.Delegate:                      1246
-    Miso.Diff:                          2619
+    Miso:                               17457
+    Miso.Delegate:                      1234
+    Miso.Diff:                          2595
     Miso.Effect:                        281
     Miso.Event.Decoder:                 921
-    Miso.Event.Types:                   21753
-    Miso.FFI:                           10798
+    Miso.Event.Types:                   21663
+    Miso.FFI:                           10721
     Miso.Html.Element:                  2632
     Miso.Html.Event:                    1003
     Miso.Html.Internal:                 26465
     Miso.Html.Property:                 2011
-    Miso.String:                        671
+    Miso.String:                        935
     Miso.Svg.Attribute:                 4024
     Miso.Svg.Element:                   2562
     Miso.Types:                         299
 
 scien_4m62Psf9729KUEAP4gkY8C
-    Data.Scientific:                    4919
+    Data.Scientific:                    4872
 
 text_DfPPBlezQfj0WJcyB3QXey
     Data.Text.Array:                    697
-    Data.Text.Internal:                 1254
+    Data.Text.Internal:                 1246
 
 unord_34NWiEgrMCw8NUnSnAxkhV
     Data.HashMap.Array:                 219
-    Data.HashMap.Base:                  3602
+    Data.HashMap.Base:                  3586
 
 vecto_DY6msUvqg3iJ5Ak1gSL0h2
-    Data.Vector:                        879
-    Data.Vector.Mutable:                1162
+    Data.Vector:                        873
+    Data.Vector.Mutable:                1154
 
 
 
-packed metadata: 202359
+packed metadata: 195959
 
