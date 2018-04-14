@@ -8,8 +8,8 @@ base:                    484834
 ghc-prim:                38856
 ghcjs_7HDZUYLWu6O9tXZr0Fsvpn:21894
 integer-gmp:             24088
-main:                    79378
-miso_CSCy35BTm867ouaMoBy3jV:94858
+main:                    81504
+miso_CSCy35BTm867ouaMoBy3jV:94884
 scien_4m62Psf9729KUEAP4gkY8C:4919
 text_DfPPBlezQfj0WJcyB3QXey:1951
 unord_34NWiEgrMCw8NUnSnAxkhV:3821
@@ -112,7 +112,7 @@ integer-gmp
 
 main
     Init:                               16994
-    Main:                               42841
+    Main:                               44967
     Solve:                              6714
     Types:                              8265
     Utilities:                          4564
@@ -124,7 +124,7 @@ miso_CSCy35BTm867ouaMoBy3jV
     Miso.Effect:                        281
     Miso.Event.Decoder:                 921
     Miso.Event.Types:                   21753
-    Miso.FFI:                           10772
+    Miso.FFI:                           10798
     Miso.Html.Element:                  2632
     Miso.Html.Event:                    1003
     Miso.Html.Internal:                 26465
@@ -151,5 +151,5 @@ vecto_DY6msUvqg3iJ5Ak1gSL0h2
 
 
 
-packed metadata: 202010
+packed metadata: 202359
 

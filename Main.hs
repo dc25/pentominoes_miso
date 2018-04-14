@@ -8,7 +8,7 @@ import qualified Data.Set as DS (null, unions)
 import Data.Maybe
 
 import Miso
-import Miso.String (ms)
+import Miso.String (ms, MisoString)
 import qualified Miso.Svg as MSV ( g_ , height_ , rect_ , svg_ , transform_ , version_ , width_ , x_ , y_, style_)
 
 import Init
@@ -40,7 +40,7 @@ data Model = Model
 -- of comparing long lists of steps which causes app 
 -- to freeze.  Model comparison is only used to 
 -- prevent unnecessary view refreshes so, worst case, 
--- this may result in more DOM comparision. 
+-- this may result in more DOM diffing.
 instance Eq Model where
   _ == _ = False
 
@@ -116,7 +116,7 @@ viewModel Model {..} =
     : viewProgress  workCellSize (head steps)
     : fmap (viewProgress solutionCellSize) (reverse solutions))
   where
-    workCellSize = 30
+    workCellSize = 36
     solutionCellSize = (workCellSize * 2) `div` 3
 
 viewControls :: Rate -> View Action
@@ -151,7 +151,7 @@ showPiece cellSize p =
       locations = getLocations p
   in fmap (showCell cellSize (getColor name)) locations
 
-showCell :: Int -> String -> (Int, Int) -> View Action
+showCell :: Int -> MisoString -> (Int, Int) -> View Action
 showCell cellSize color (row, col) =
   MSV.g_
     [ MSV.transform_
@@ -172,7 +172,7 @@ showCell cellSize color (row, col) =
   where
     scale = show cellSize
 
-getColor :: Char -> String
+getColor :: Char -> MisoString
 getColor name =
   let colorMap =
         fromList
