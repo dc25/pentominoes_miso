@@ -35,6 +35,7 @@ rotatePiece p = DS.map rotateSpot p
 flipPiece :: Piece -> Piece
 flipPiece p = DS.map flipSpot p
 
+-- rotations and flipped rotations of a piece.
 variants :: Piece -> [Piece]
 variants p0 =
   let p1 = rotatePiece p0
@@ -67,8 +68,8 @@ positions board p = nub $ positions0 board p
 nameToPiece :: [[Char]] -> Char -> Piece
 nameToPiece image name = 
   let unboundedGrid = [[(row, col) | row <- [0 .. ]] | col <- [0 .. ]]
-      indexed = concat $ zipWith zip unboundedGrid image
-      pieceCoords = Prelude.filter (\((r, c), n) -> n == name) indexed
+      indexedGrid = concat $ zipWith zip unboundedGrid image
+      pieceCoords = Prelude.filter (\((r, c), n) -> n == name) indexedGrid
   in fromList $ Name name : ((Location . fst) <$> pieceCoords)
 
 initialProgress :: [(Int, Int)] -> [[Char]] -> Progress Spot
@@ -76,11 +77,11 @@ initialProgress squares image =
   let -- gather the names
       names = nub $ concat image
 
-      -- construct the pieces by name.
-      pieces = fmap (nameToPiece image) names
-
       -- construct the board - a set of both Name and Location Spots.
       emptyBoard = fromList $ fmap Name names ++ fmap Location squares
+
+      -- construct the pieces by name.
+      pieces = fmap (nameToPiece image) names
 
       -- gather all possible placements of the pieces on the board.
       placements = fromList $ concat $ (positions emptyBoard) <$> pieces
