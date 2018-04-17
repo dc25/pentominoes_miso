@@ -1,5 +1,6 @@
 module Init ( initialProgress ) where
 
+import Control.Monad
 import Data.List 
 import Data.Set as DS
 
@@ -34,22 +35,8 @@ rotatePiece p = DS.map rotateSpot p
 flipPiece :: Piece -> Piece
 flipPiece p = DS.map flipSpot p
 
-translations :: Board -> Piece -> [(Int, Int)]
-translations board p = do
-  let ((minRow, minCol), (maxRow, maxCol)) = bounds p
-      ((minRowBoard, minColBoard), (maxRowBoard, maxColBoard)) = bounds board
-  vt <- [minRowBoard - maxRow .. maxRowBoard - minRow]
-  ht <- [minColBoard - maxCol .. maxColBoard - minCol]
-  return (vt, ht)
-
-placements :: Board -> Piece -> [Piece]
-placements board p =
-  Prelude.filter
-    (`isSubsetOf` board)
-    (fmap (translatePiece p) (translations board p))
-
-fullPlacements :: Board -> Piece -> [Piece]
-fullPlacements board p0 =
+variants :: Piece -> [Piece]
+variants p0 =
   let p1 = rotatePiece p0
       p2 = rotatePiece p1
       p3 = rotatePiece p2
@@ -57,24 +44,23 @@ fullPlacements board p0 =
       r1 = flipPiece p1
       r2 = flipPiece p2
       r3 = flipPiece p3
+  in [p0,p1,p2,p3,r0,r1,r2,r3]
 
-      placementsWithDuplicates =
-           placements board p0 
-        ++ placements board p1 
-        ++ placements board p2 
-        ++ placements board p3 
-        ++ placements board r0 
-        ++ placements board r1 
-        ++ placements board r2 
-        ++ placements board r3
+-- all the placements of a piece on a board ; may be duplicates
+positions0 :: Board -> Piece -> [Piece]
+positions0 board p = do
+  pv <- variants p
+  let ((minRow, minCol), (maxRow, maxCol)) = bounds pv
+      ((minRowBoard, minColBoard), (maxRowBoard, maxColBoard)) = bounds board
+  vt <- [minRowBoard - maxRow .. maxRowBoard - minRow]
+  ht <- [minColBoard - maxCol .. maxColBoard - minCol]
+  let translated = translatePiece pv (vt,ht)
+  guard $ translated `isSubsetOf` board
+  return $ translatePiece pv (vt, ht)
 
-   in nub placementsWithDuplicates
-
--- Given a list of pieces and a board (Set of Spots) construct the
--- set of all placements on the board of translations and rotations 
--- of the pieces, 
-allPlacements :: Board -> [Piece] -> Set Piece
-allPlacements board pieces = fromList $ concatMap (fullPlacements board) pieces
+-- all the placements of a piece on a board ; no duplicates
+positions :: Board -> Piece -> [Piece]
+positions board p = nub $ positions0 board p
 
 -- Given an image (list of lists) of a bunch of piece names (chars) and 
 -- the name of a particular piece, construct the Piece (a Set of Spots) .
@@ -97,6 +83,5 @@ initialProgress squares image =
       emptyBoard = fromList $ fmap Name names ++ fmap Location squares
 
       -- gather all possible placements of the pieces on the board.
-      placements = allPlacements emptyBoard pieces 
+      placements = fromList $ concat $ (positions emptyBoard) <$> pieces
   in Progress [] emptyBoard placements
-
