@@ -1,8 +1,15 @@
-module Utilities ( isLocation, isName, getName, getLocation, getLocations, bounds) where
+module Puzzle (Spot(..), Piece, Board, isLocation, isName, getName, getLocation, getLocations, bounds) where
 
 import Data.Set as DS
 
-import Types
+data Spot
+  = Location (Int, Int)
+  | Name Char
+  deriving (Show, Eq, Ord)
+
+type Piece = Set Spot
+
+type Board = Set Spot
 
 isLocation :: Spot -> Bool
 isLocation (Location _) = True

@@ -4,9 +4,8 @@ import Control.Monad
 import Data.List 
 import Data.Set as DS
 
-import Types
+import Puzzle
 import Solve
-import Utilities
 
 translateSpot :: (Int, Int) -> Spot -> Spot
 translateSpot (vshift, hshift) loc =
