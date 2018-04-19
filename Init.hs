@@ -4,7 +4,7 @@ import Control.Monad
 import Data.List 
 import Data.Set as DS
 
-import Puzzle
+import Piece
 import Solve
 
 type Board = Set Spot

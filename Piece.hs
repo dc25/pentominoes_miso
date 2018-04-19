@@ -1,4 +1,4 @@
-module Puzzle (Spot(..), Piece, getName, getLocations, bounds, translate, variants) where
+module Piece (Spot(..), Piece, getName, getLocations, bounds, translate, variants) where
 
 import Data.Set as DS
 

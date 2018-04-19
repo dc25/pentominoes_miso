@@ -3,7 +3,7 @@ import Data.Set
 import Data.List.Split
 import Data.List
 
-import Puzzle
+import Piece
 import Init
 import Solve
 

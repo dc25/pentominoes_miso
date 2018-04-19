@@ -11,7 +11,7 @@ import Miso
 import Miso.String (ms, MisoString, append)
 import qualified Miso.Svg as MSV ( g_ , height_ , rect_ , svg_ , transform_ , version_ , width_ , x_ , y_, style_)
 
-import Puzzle
+import Piece
 import Init
 import Solve (steps, Progress(..))
 
