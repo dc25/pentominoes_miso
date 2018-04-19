@@ -4,9 +4,9 @@ import Control.Monad
 import Data.Set as DS 
 import Data.Tree
 
-data Progress a = Progress { used :: [Set a]
-                           , uncovered :: Set a
-                           , unused :: Set (Set a)
+data Progress a = Progress { used :: [Set a]  -- solution in progress
+                           , uncovered :: Set a -- still to cover
+                           , unused :: Set (Set a) -- pieces available
                            } 
 
 next :: Ord a => Progress a -> [Progress a]
