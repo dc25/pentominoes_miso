@@ -18,10 +18,12 @@ main = do
         ]
       board = [(row, col) | row <- [0 .. 11], col <- [0 .. 4]]
 
-      zeroProgress :: Progress Spot
+      zeroProgress :: Progress Element
       zeroProgress = initialProgress board pieces 
 
-      firstSolution :: [Piece]
+  print $ "Piece count = " ++ show (length $ unused zeroProgress)
+
+  let firstSolution :: [Piece]
       firstSolution =   used -- the pieces used for the first solution
                       $ head -- the first solution
                       $ solutions -- get the list of solutions
