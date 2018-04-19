@@ -7,44 +7,7 @@ import Data.Set as DS
 import Puzzle
 import Solve
 
-translateSpot :: (Int, Int) -> Spot -> Spot
-translateSpot (vshift, hshift) loc =
-  case loc of
-    Location (row, col) -> Location (row + vshift, col + hshift)
-    _ -> loc
-
-rotateSpot :: Spot -> Spot
-rotateSpot loc =
-  case loc of
-    Location (row, col) -> Location (col, -row)
-    _ -> loc
-
-flipSpot :: Spot -> Spot
-flipSpot loc =
-  case loc of
-    Location (row, col) -> Location (col, row)
-    _ -> loc
-
-translatePiece :: Piece -> (Int, Int) -> Piece
-translatePiece p shift = DS.map (translateSpot shift) p
-
-rotatePiece :: Piece -> Piece
-rotatePiece p = DS.map rotateSpot p
-
-flipPiece :: Piece -> Piece
-flipPiece p = DS.map flipSpot p
-
--- rotations and flipped rotations of a piece.
-variants :: Piece -> [Piece]
-variants p0 =
-  let p1 = rotatePiece p0
-      p2 = rotatePiece p1
-      p3 = rotatePiece p2
-      r0 = flipPiece p0
-      r1 = flipPiece p1
-      r2 = flipPiece p2
-      r3 = flipPiece p3
-  in [p0,p1,p2,p3,r0,r1,r2,r3]
+type Board = Set Spot
 
 -- all the placements of a piece on a board ; may be duplicates
 positions0 :: Board -> Piece -> [Piece]
@@ -54,16 +17,16 @@ positions0 board p = do
       ((minRowBoard, minColBoard), (maxRowBoard, maxColBoard)) = bounds board
   vt <- [minRowBoard - maxRow .. maxRowBoard - minRow]
   ht <- [minColBoard - maxCol .. maxColBoard - minCol]
-  let translated = translatePiece pv (vt,ht)
+  let translated = translate (vt,ht) pv 
   guard $ translated `isSubsetOf` board
-  return $ translatePiece pv (vt, ht)
+  return $ translated
 
 -- all the placements of a piece on a board ; no duplicates
 positions :: Board -> Piece -> [Piece]
 positions board p = nub $ positions0 board p
 
--- Given an image (list of lists) of a bunch of piece names (chars) and 
--- the name of a particular piece, construct the Piece (a Set of Spots) .
+-- Given an image (list of lists) of a many piece names (chars) and 
+-- the name of a Piece, construct that Piece (a Set of Spots) .
 nameToPiece :: [[Char]] -> Char -> Piece
 nameToPiece image name = 
   let unboundedGrid = [[(row, col) | row <- [0 .. ]] | col <- [0 .. ]]
