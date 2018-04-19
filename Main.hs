@@ -29,8 +29,8 @@ data Action
 
 data Model = Model
   { time :: Double
-  , steps :: [Progress Spot]
-  , solutions :: [Progress Spot]
+  , steps :: [Progress Element]
+  , solutions :: [Progress Element]
   , rate :: Rate
   , stepRequested :: Bool
   } 
@@ -93,7 +93,7 @@ updateModel (Time nTime) model@Model {..} = Effect newModel [(Time <$> now)]
              where 
                nSteps = tail steps
                currentStep = head nSteps
-               -- if no spots remain uncovered, we have a solution
+               -- if no elements remain uncovered, we have a solution
                -- so add it to the list of solutions.
                nSolutions =
                  if (DS.null $ uncovered currentStep)
@@ -127,7 +127,7 @@ viewControls rate =
      ] ++ [button_ [onClick RequestStep] [text "Step"] | rate == Step]
     )
 
-viewProgress :: Int -> Progress Spot -> View Action
+viewProgress :: Int -> Progress Element -> View Action
 viewProgress cellSize (Progress used uncovered _) =
   div_
     []
@@ -139,16 +139,14 @@ viewProgress cellSize (Progress used uncovered _) =
         (concatMap (showPiece cellSize) used)
     ]
   where
-    spots = DS.unions (uncovered : used)
-    ((rMin, cMin), (rMax, cMax)) = bounds spots
+    elements = DS.unions (uncovered : used)
+    ((rMin, cMin), (rMax, cMax)) = bounds elements
     w = 1 + cMax - cMin 
     h = 1 + rMax - rMin 
 
 showPiece :: Int -> Piece -> [View Action]
 showPiece cellSize p =
-  let name = getName p
-      locations = getLocations p
-  in fmap (showCell cellSize (getColor name)) locations
+  fmap (showCell cellSize (getColor p)) (getLocations p)
 
 showCell :: Int -> MisoString -> (Int, Int) -> View Action
 showCell cellSize color (row, col) =
@@ -171,9 +169,10 @@ showCell cellSize color (row, col) =
     scaleTransform = "scale (" `append` scale `append` ", " `append` scale `append` ") " 
     translateTransform = "translate (" `append` ms col `append` ", " `append` ms row `append` ") "
 
-getColor :: Char -> MisoString
-getColor name =
-  let colorMap =
+getColor :: Piece -> MisoString
+getColor piece =
+  let name = getName piece
+      colorMap =
         fromList
           [ ('F', "green")
           , ('I', "blue")

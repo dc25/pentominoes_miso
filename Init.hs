@@ -7,7 +7,7 @@ import Data.Set as DS
 import Piece
 import Solve
 
-type Board = Set Spot
+type Board = Set Element
 
 -- all the placements of a piece on a board ; may be duplicates
 positions0 :: Board -> Piece -> [Piece]
@@ -34,7 +34,7 @@ nameToPiece image name =
       pieceCoords = Prelude.filter (\((r, c), n) -> n == name) indexedGrid
   in fromList $ Name name : ((Location . fst) <$> pieceCoords)
 
-initialProgress :: [(Int, Int)] -> [[Char]] -> Progress Spot
+initialProgress :: [(Int, Int)] -> [[Char]] -> Progress Element
 initialProgress squares image = 
   let -- gather the names
       names = nub $ concat image

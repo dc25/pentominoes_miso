@@ -1,19 +1,19 @@
-module Piece (Spot(..), Piece, getName, getLocations, bounds, translate, variants) where
+module Piece (Element(..), Piece, getName, getLocations, bounds, translate, variants) where
 
 import Data.Set as DS
 
-data Spot
+data Element
   = Location (Int, Int)
   | Name Char
   deriving (Show, Eq, Ord)
 
-type Piece = Set Spot
+type Piece = Set Element
 
-isLocation :: Spot -> Bool
+isLocation :: Element -> Bool
 isLocation (Location _) = True
 isLocation (Name _) = False
 
-isName :: Spot -> Bool
+isName :: Element -> Bool
 isName = not . isLocation
 
 getName :: Piece -> Char
@@ -21,13 +21,13 @@ getName p =
   let Name ch = head $ toList $ DS.filter isName p
   in ch
 
-getLocation :: Spot -> (Int, Int)
+getLocation :: Element -> (Int, Int)
 getLocation (Location lo) = lo
 
 getLocations :: Piece -> [(Int, Int)]
 getLocations = fmap getLocation . toList . DS.filter isLocation
 
-bounds :: Set Spot -> ((Int, Int), (Int, Int))
+bounds :: Set Element -> ((Int, Int), (Int, Int))
 bounds p =
   let locations = DS.filter isLocation p
       coords = (\(Location (row, col)) -> (row, col)) <$> toList locations
