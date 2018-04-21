@@ -27,42 +27,23 @@ getLocation (Location lo) = lo
 getLocations :: Piece -> [(Int, Int)]
 getLocations = fmap getLocation . toList . DS.filter isLocation
 
-bounds :: Set Element -> ((Int, Int), (Int, Int))
-bounds p =
-  let locations = DS.filter isLocation p
-      coords = (\(Location (row, col)) -> (row, col)) <$> toList locations
-      rows = fmap fst coords
+bounds :: [(Int,Int)] -> ((Int, Int), (Int, Int))
+bounds coords =
+  let rows = fmap fst coords
       cols = fmap snd coords
-   in ((minimum rows, minimum cols), (maximum rows, maximum cols))
+  in ((minimum rows, minimum cols), (maximum rows, maximum cols))
 
-rotate :: Piece -> Piece
-rotate = DS.map rotateSpot 
-  where
-    rotateSpot loc =
-      case loc of
-        Location (row, col) -> Location (col, -row)
-        _ -> loc
+rotate :: [(Int,Int)] -> [(Int,Int)]
+rotate = fmap (\(row,col) -> (col, -row)) 
 
-reflect :: Piece -> Piece
-reflect = 
-  DS.map reflectSpot 
-  where
-    reflectSpot loc =
-      case loc of
-        Location (row, col) -> Location (col, row)
-        _ -> loc
+reflect :: [(Int,Int)] -> [(Int,Int)]
+reflect = fmap (\(row,col) -> (col, row)) 
 
-translate :: (Int, Int) -> Piece -> Piece
-translate shift = 
-  DS.map (translateSpot shift) 
-  where
-    translateSpot (vshift, hshift) loc =
-      case loc of
-        Location (row, col) -> Location (row + vshift, col + hshift)
-        _ -> loc
+translate :: (Int, Int) -> [(Int,Int)] -> [(Int,Int)]
+translate (rowTrans, colTrans) = fmap (\(row,col) -> (row+rowTrans, col+colTrans)) 
 
 -- rotations and reflected rotations of a piece.
-variants :: Piece -> [Piece]
+variants :: [(Int,Int)] -> [[(Int,Int)]]
 variants p0 =
   let p1 = rotate p0
       p2 = rotate p1

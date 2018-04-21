@@ -140,7 +140,7 @@ viewProgress cellSize (Progress used uncovered _) =
     ]
   where
     elements = DS.unions (uncovered : used)
-    ((rMin, cMin), (rMax, cMax)) = bounds elements
+    ((rMin, cMin), (rMax, cMax)) = bounds $ getLocations elements
     w = 1 + cMax - cMin 
     h = 1 + rMax - rMin 
 
