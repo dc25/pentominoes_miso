@@ -2,13 +2,13 @@ code size summary per package:
 
 AHOOhHjGLItBYmDB2lAxxO:  826
 DfpZFnZR7Sa7Y07uHwVn10:  10227
-KQpEOkJjX9qJTwsO87bqLg:  218130
+KQpEOkJjX9qJTwsO87bqLg:  209836
 aeson_D4zMF1P1ZpsKMgz9HPiZU6:20876
 base:                    429404
 ghc-prim:                39576
 ghcjs_7HDZUYLWu6O9tXZr0Fsvpn:22043
 integer-gmp:             24088
-main:                    77019
+main:                    75880
 miso_CSCy35BTm867ouaMoBy3jV:94803
 scien_4m62Psf9729KUEAP4gkY8C:4872
 text_DfPPBlezQfj0WJcyB3QXey:1943
@@ -28,7 +28,7 @@ DfpZFnZR7Sa7Y07uHwVn10
 KQpEOkJjX9qJTwsO87bqLg
     Data.Map.Base:                      55948
     Data.Sequence:                      37067
-    Data.Set.Base:                      122089
+    Data.Set.Base:                      113795
     Data.Tree:                          3026
 
 aeson_D4zMF1P1ZpsKMgz9HPiZU6
@@ -112,7 +112,7 @@ integer-gmp
     GHC.Integer.Type:                   23755
 
 main
-    Init:                               17169
+    Init:                               16030
     Main:                               42512
     Piece:                              10251
     Solve:                              7087
@@ -151,5 +151,5 @@ vecto_DY6msUvqg3iJ5Ak1gSL0h2
 
 
 
-packed metadata: 196004
+packed metadata: 194631
 
