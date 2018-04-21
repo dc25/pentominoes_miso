@@ -44,8 +44,7 @@ positions0 board p = do
       ((minRowBoard, minColBoard), (maxRowBoard, maxColBoard)) = bounds board
   vt <- [minRowBoard - minRowPiece .. maxRowBoard - maxRowPiece]
   ht <- [minColBoard - minColPiece .. maxColBoard - maxColPiece]
-  let translated = translate (vt,ht) pv 
-  return translated
+  return $ translate (vt,ht) pv 
 
 -- all the placements of a piece on a board ; no duplicates
 positions :: [(Int,Int)] -> [(Int,Int)]-> [[(Int,Int)]]
