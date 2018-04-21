@@ -46,7 +46,7 @@ positions0 board p = do
   ht <- [minColBoard - maxCol .. maxColBoard - minCol]
   let translated = translate (vt,ht) pv 
   guard $ fromList translated `isSubsetOf` fromList board
-  return $ translated
+  return translated
 
 -- all the placements of a piece on a board ; no duplicates
 positions :: [(Int,Int)] -> [(Int,Int)]-> [[(Int,Int)]]
@@ -57,7 +57,7 @@ nameToPlacements squares image name =
   let unboundedGrid = [[(row, col) | row <- [0 .. ]] | col <- [0 .. ]]
       indexedGrid = concat $ zipWith zip unboundedGrid image
       hasName ((row,col), n) = n == name
-      pieceCoords = fmap fst $ Prelude.filter hasName indexedGrid
+      pieceCoords = fst <$> Prelude.filter hasName indexedGrid
   in fromList . (Name name :) . fmap Location <$> positions squares pieceCoords
 
 initialProgress :: [(Int, Int)] -> [[Char]] -> Progress Cell

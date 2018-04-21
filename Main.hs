@@ -59,7 +59,7 @@ main = do
       zeroProgress :: Progress Cell
       zeroProgress = initialProgress board pieces 
 
-      allSteps = (Solve.steps) zeroProgress
+      allSteps = Solve.steps zeroProgress
 
       initialModel =
         Model
@@ -87,12 +87,12 @@ updateModel (SetRate newRate) model = Effect (model {rate = newRate}) []
 
 updateModel RequestStep model = Effect (model {stepRequested = True}) []
 
-updateModel (Time nTime) model@Model {..} = Effect newModel [(Time <$> now)]
+updateModel (Time nTime) model@Model {..} = Effect newModel [Time <$> now]
   where
     delta = nTime - time
     (newSteps, newSolutions, newTime) = 
         if      ((rate == Slow) && (delta < 400.0))
-           ||   ((rate == Step) && (not stepRequested))
+           ||   ((rate == Step) && not stepRequested)
         then (steps, solutions, time)
         else (nSteps, nSolutions, nTime)
              where 
@@ -101,7 +101,7 @@ updateModel (Time nTime) model@Model {..} = Effect newModel [(Time <$> now)]
                -- if no cells remain uncovered, we have a solution
                -- so add it to the list of solutions.
                nSolutions =
-                 if (DS.null $ uncovered currentStep)
+                 if DS.null $ uncovered currentStep
                  then currentStep : solutions
                  else solutions
         

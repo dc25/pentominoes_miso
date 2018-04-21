@@ -20,7 +20,7 @@ next (Progress used uncovered unused) = do
   guard (minCount > 0) -- nothing goes here; failed
 
   -- get each unused piece that covers this element
-  ns <- toList $ DS.filter (member $ minCountCell) unused
+  ns <- toList $ DS.filter (member minCountCell) unused
 
   let -- remove the cells covered by this piece from the board
       newUncovered = uncovered \\ ns
