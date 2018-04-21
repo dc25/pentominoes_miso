@@ -3,17 +3,12 @@ code size summary per package:
 AHOOhHjGLItBYmDB2lAxxO:  826
 DfpZFnZR7Sa7Y07uHwVn10:  10227
 KQpEOkJjX9qJTwsO87bqLg:  218130
-aeson_D4zMF1P1ZpsKMgz9HPiZU6:20876
-base:                    429404
-ghc-prim:                39576
-ghcjs_7HDZUYLWu6O9tXZr0Fsvpn:22043
-integer-gmp:             24088
-main:                    77019
-miso_CSCy35BTm867ouaMoBy3jV:94803
-scien_4m62Psf9729KUEAP4gkY8C:4872
-text_DfPPBlezQfj0WJcyB3QXey:1943
-unord_34NWiEgrMCw8NUnSnAxkhV:3805
-vecto_DY6msUvqg3iJ5Ak1gSL0h2:2027
+base:                    315855
+ghc-prim:                33273
+ghcjs_7HDZUYLWu6O9tXZr0Fsvpn:18798
+integer-gmp:             2227
+main:                    60608
+miso_CSCy35BTm867ouaMoBy3jV:66088
 
 
 code size per module:
@@ -31,17 +26,12 @@ KQpEOkJjX9qJTwsO87bqLg
     Data.Set.Base:                      122089
     Data.Tree:                          3026
 
-aeson_D4zMF1P1ZpsKMgz9HPiZU6
-    Data.Aeson.Types.Instances:         4364
-    Data.Aeson.Types.Internal:          16512
-
 base
     Control.Exception.Base:             6010
     Control.Monad:                      505
-    Data.Either:                        397
     Data.Foldable:                      4789
     Data.Functor:                       108
-    Data.Maybe:                         1025
+    Data.Maybe:                         303
     Data.OldList:                       2095
     Data.Tuple:                         334
     Data.Typeable:                      885
@@ -50,14 +40,11 @@ base
     Foreign.Marshal.Alloc:              375
     Foreign.Marshal.Array:              2038
     Foreign.Storable:                   2680
-    GHC.Arr:                            3667
     GHC.Base:                           15903
     GHC.Conc.Sync:                      7822
     GHC.Enum:                           10262
     GHC.Err:                            218
-    GHC.Exception:                      6644
-    GHC.Float:                          77428
-    GHC.Float.ConversionUtils:          3383
+    GHC.Exception:                      2991
     GHC.Foreign:                        12136
     GHC.ForeignPtr:                     1265
     GHC.IO:                             3605
@@ -76,12 +63,10 @@ base
     GHC.IO.Handle.Types:                3571
     GHC.IORef:                          166
     GHC.Int:                            802
-    GHC.List:                           16124
+    GHC.List:                           15620
     GHC.MVar:                           188
-    GHC.Num:                            3347
+    GHC.Num:                            3261
     GHC.Ptr:                            188
-    GHC.Real:                           23523
-    GHC.ST:                             186
     GHC.STRef:                          194
     GHC.Show:                           19967
     GHC.Storable:                       1084
@@ -91,10 +76,10 @@ base
 
 ghc-prim
     GHC.CString:                        4537
-    GHC.Classes:                        32875
+    GHC.Classes:                        26648
     GHC.IntWord64:                      146
     GHC.Tuple:                          802
-    GHC.Types:                          1216
+    GHC.Types:                          1140
 
 ghcjs_7HDZUYLWu6O9tXZr0Fsvpn
     Data.JSString:                      9836
@@ -102,18 +87,18 @@ ghcjs_7HDZUYLWu6O9tXZr0Fsvpn
     Data.JSString.Internal.Type:        242
     GHCJS.Foreign.Internal:             366
     GHCJS.Internal.Types:               231
-    GHCJS.Marshal:                      8467
-    GHCJS.Marshal.Internal:             1091
+    GHCJS.Marshal:                      5439
+    GHCJS.Marshal.Internal:             874
     GHCJS.Marshal.Pure:                 390
     JavaScript.Web.AnimationFrame:      962
 
 integer-gmp
-    GHC.Integer.GMP.Prim:               333
-    GHC.Integer.Type:                   23755
+    GHC.Integer.GMP.Prim:               172
+    GHC.Integer.Type:                   2055
 
 main
     Init:                               17169
-    Main:                               42512
+    Main:                               26101
     Piece:                              10251
     Solve:                              7087
 
@@ -122,34 +107,16 @@ miso_CSCy35BTm867ouaMoBy3jV
     Miso.Delegate:                      1234
     Miso.Diff:                          2595
     Miso.Effect:                        281
-    Miso.Event.Decoder:                 921
-    Miso.Event.Types:                   21663
-    Miso.FFI:                           10721
-    Miso.Html.Element:                  2632
-    Miso.Html.Event:                    1003
-    Miso.Html.Internal:                 26465
-    Miso.Html.Property:                 2011
+    Miso.Event.Types:                   21150
+    Miso.FFI:                           194
+    Miso.Html.Element:                  868
+    Miso.Html.Internal:                 14489
     Miso.String:                        935
     Miso.Svg.Attribute:                 4024
     Miso.Svg.Element:                   2562
     Miso.Types:                         299
 
-scien_4m62Psf9729KUEAP4gkY8C
-    Data.Scientific:                    4872
-
-text_DfPPBlezQfj0WJcyB3QXey
-    Data.Text.Array:                    697
-    Data.Text.Internal:                 1246
-
-unord_34NWiEgrMCw8NUnSnAxkhV
-    Data.HashMap.Array:                 219
-    Data.HashMap.Base:                  3586
-
-vecto_DY6msUvqg3iJ5Ak1gSL0h2
-    Data.Vector:                        873
-    Data.Vector.Mutable:                1154
 
 
-
-packed metadata: 196004
+packed metadata: 146505
 

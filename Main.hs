@@ -15,24 +15,14 @@ import Piece
 import Init
 import Solve (steps, Progress(..))
 
-data Rate
-  = Fast
-  | Slow
-  | Step
-  deriving (Eq)
 
 data Action
-  = Time Double
-  | SetRate Rate
-  | RequestStep
+  = Time 
   deriving (Eq)
 
 data Model = Model
-  { time :: Double
-  , steps :: [Progress Cell]
-  , solutions :: [Progress Cell]
-  , rate :: Rate
-  , stepRequested :: Bool
+  { 
+    steps :: [Progress Cell]
   } 
 
 -- Model comparision using derived Eq runs the risk 
@@ -63,17 +53,14 @@ main = do
 
       initialModel =
         Model
-          { time = 0
-          , steps = allSteps
-          , solutions = []
-          , rate = Step
-          , stepRequested = False
+          { 
+            steps = allSteps
           }
 
   startApp
     App
       { model = initialModel
-      , initialAction = Time t
+      , initialAction = Time 
       , update = updateModel
       , view = viewModel
       , events = defaultEvents
@@ -83,54 +70,22 @@ main = do
 
 updateModel :: Action -> Model -> Effect Action Model
 
-updateModel (SetRate newRate) model = Effect (model {rate = newRate}) []
-
-updateModel RequestStep model = Effect (model {stepRequested = True}) []
-
-updateModel (Time nTime) model@Model {..} = Effect newModel [Time <$> now]
+updateModel Time model@Model {..} = Effect newModel [return Time]
   where
-    delta = nTime - time
-    (newSteps, newSolutions, newTime) = 
-        if      ((rate == Slow) && (delta < 400.0))
-           ||   ((rate == Step) && not stepRequested)
-        then (steps, solutions, time)
-        else (nSteps, nSolutions, nTime)
-             where 
-               nSteps = tail steps
-               currentStep = head nSteps
-               -- if no cells remain uncovered, we have a solution
-               -- so add it to the list of solutions.
-               nSolutions =
-                 if DS.null $ uncovered currentStep
-                 then currentStep : solutions
-                 else solutions
-        
     newModel =
       model
-        { time = newTime 
-        , Main.steps = newSteps
-        , solutions = newSolutions
-        , stepRequested = False
+        { 
+          Main.steps = tail steps
         }
 
 viewModel :: Model -> View Action
 viewModel Model {..} =
   div_ []
-    ( viewControls rate 
-    : viewProgress  workCellSize (head steps)
-    : fmap (viewProgress solutionCellSize) (reverse solutions))
+    ( 
+      [viewProgress  workCellSize (head steps)]
+    )
   where
     workCellSize = 30
-    solutionCellSize = (workCellSize * 2) `div` 3
-
-viewControls :: Rate -> View Action
-viewControls rate =
-  div_ []
-    ([ input_ [ type_ "radio" , name_ "updateRate" , checked_ (rate == Fast) , onClick (SetRate Fast) ] [] , text "Fast"
-     , input_ [ type_ "radio" , name_ "updateRate" , checked_ (rate == Slow) , onClick (SetRate Slow) ] [] , text "Slow"
-     , input_ [ type_ "radio" , name_ "updateRate" , checked_ (rate == Step) , onClick (SetRate Step) ] [] , text "Step"
-     ] ++ [button_ [onClick RequestStep] [text "Step"] | rate == Step]
-    )
 
 viewProgress :: Int -> Progress Cell -> View Action
 viewProgress cellSize (Progress used uncovered _) =
