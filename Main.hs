@@ -117,11 +117,11 @@ viewModel :: Model -> View Action
 viewModel Model {..} =
   div_ []
     ( viewControls rate 
-    : viewProgress  workCellSize (head steps)
-    : fmap (viewProgress solutionCellSize) (reverse solutions))
+    : viewProgress  workElementSize (head steps)
+    : fmap (viewProgress solutionElementSize) (reverse solutions))
   where
-    workCellSize = 30
-    solutionCellSize = (workCellSize * 2) `div` 3
+    workElementSize = 30
+    solutionElementSize = (workElementSize * 2) `div` 3
 
 viewControls :: Rate -> View Action
 viewControls rate =
@@ -133,15 +133,15 @@ viewControls rate =
     )
 
 viewProgress :: Int -> Progress Element -> View Action
-viewProgress cellSize (Progress used uncovered _) =
+viewProgress elementSize (Progress used uncovered _) =
   div_
     []
     [ MSV.svg_
         [ MSV.version_ "1.1"
-        , MSV.width_ (ms (w * cellSize))
-        , MSV.height_ (ms (h * cellSize))
+        , MSV.width_ (ms (w * elementSize))
+        , MSV.height_ (ms (h * elementSize))
         ]
-        (concatMap (showPiece cellSize) used)
+        (concatMap (showPiece elementSize) used)
     ]
   where
     elements = DS.unions (uncovered : used)
@@ -150,11 +150,11 @@ viewProgress cellSize (Progress used uncovered _) =
     h = 1 + rMax - rMin 
 
 showPiece :: Int -> Piece -> [View Action]
-showPiece cellSize p =
-  fmap (showCell cellSize (getColor p)) (getLocations p)
+showPiece elementSize p =
+  fmap (showElement elementSize (getColor p)) (getLocations p)
 
-showCell :: Int -> MisoString -> (Int, Int) -> View Action
-showCell cellSize color (row, col) =
+showElement :: Int -> MisoString -> (Int, Int) -> View Action
+showElement elementSize color (row, col) =
   MSV.g_
     [ MSV.transform_ $ scaleTransform `append` translateTransform
     ]
@@ -170,7 +170,7 @@ showCell cellSize color (row, col) =
         []
     ]
   where
-    scale = ms cellSize
+    scale = ms elementSize
     scaleTransform = "scale (" `append` scale `append` ", " `append` scale `append` ") " 
     translateTransform = "translate (" `append` ms col `append` ", " `append` ms row `append` ") "
 

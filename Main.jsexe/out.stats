@@ -8,7 +8,7 @@ base:                    429404
 ghc-prim:                39576
 ghcjs_7HDZUYLWu6O9tXZr0Fsvpn:22043
 integer-gmp:             24088
-main:                    77046
+main:                    77052
 miso_CSCy35BTm867ouaMoBy3jV:94803
 scien_4m62Psf9729KUEAP4gkY8C:4872
 text_DfPPBlezQfj0WJcyB3QXey:1943
@@ -113,7 +113,7 @@ integer-gmp
 
 main
     Init:                               17175
-    Main:                               42518
+    Main:                               42524
     Piece:                              10266
     Solve:                              7087
 
@@ -151,5 +151,5 @@ vecto_DY6msUvqg3iJ5Ak1gSL0h2
 
 
 
-packed metadata: 196004
+packed metadata: 196010
 
