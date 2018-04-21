@@ -27,6 +27,7 @@ data Action
 
 data Model = Model
   { steps :: [Progress Cell]
+  , solutions :: [Progress Cell]
   , time :: Double
   , rate :: Rate
   } 
@@ -61,6 +62,7 @@ main = do
         Model
           { 
             steps = allSteps
+          , solutions = []
           , time = 0
           , rate = Fast
           }
@@ -81,17 +83,25 @@ updateModel :: Action -> Model -> Effect Action Model
 updateModel (Time nTime) model@Model {..} = Effect newModel [Time <$> now]
   where
     delta = nTime - time
-    (newSteps, newTime) = 
+    (newSteps, newSolutions, newTime) = 
         if      ((rate == Slow) && (delta < 400.0))
-        then (steps, time)
-        else (nSteps, nTime)
+        then (steps, solutions, time)
+        else (nSteps, nSolutions, nTime)
              where 
                nSteps = tail steps
+               currentStep = head nSteps
+               -- if no cells remain uncovered, we have a solution
+               -- so add it to the list of solutions.
+               nSolutions =
+                 if DS.null $ uncovered currentStep
+                 then currentStep : solutions
+                 else solutions
         
     newModel =
       model
-        { Main.steps = newSteps
-        , time = newTime 
+        { time = newTime 
+        , Main.steps = newSteps
+        , solutions = newSolutions
         }
 
 updateModel (SetRate newRate) model = Effect (model {rate = newRate}) []
@@ -99,11 +109,12 @@ updateModel (SetRate newRate) model = Effect (model {rate = newRate}) []
 viewModel :: Model -> View Action
 viewModel Model {..} =
   div_ []
-    ( viewControls rate
-    : [viewProgress  workCellSize (head steps)]
-    )
+    ( viewControls rate 
+    : viewProgress  workCellSize (head steps)
+    : fmap (viewProgress solutionCellSize) (reverse solutions))
   where
     workCellSize = 30
+    solutionCellSize = (workCellSize * 2) `div` 3
 
 viewControls :: Rate -> View Action
 viewControls rate =
