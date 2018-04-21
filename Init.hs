@@ -40,12 +40,11 @@ bounds coords =
 positions0 :: [(Int,Int)] -> [(Int,Int)]-> [[(Int,Int)]]
 positions0 board p = do
   pv <- variants p
-  let ((minRow, minCol), (maxRow, maxCol)) = bounds pv
+  let ((minRowPiece, minColPiece), (maxRowPiece, maxColPiece)) = bounds pv
       ((minRowBoard, minColBoard), (maxRowBoard, maxColBoard)) = bounds board
-  vt <- [minRowBoard - maxRow .. maxRowBoard - minRow]
-  ht <- [minColBoard - maxCol .. maxColBoard - minCol]
+  vt <- [minRowBoard - minRowPiece .. maxRowBoard - maxRowPiece]
+  ht <- [minColBoard - minColPiece .. maxColBoard - maxColPiece]
   let translated = translate (vt,ht) pv 
-  guard $ fromList translated `isSubsetOf` fromList board
   return translated
 
 -- all the placements of a piece on a board ; no duplicates
@@ -55,10 +54,27 @@ positions board p = nub $ positions0 board p
 nameToPlacements :: [(Int, Int)] -> [[Char]] -> Char -> [Piece]
 nameToPlacements squares image name =
   let unboundedGrid = [[(row, col) | row <- [0 .. ]] | col <- [0 .. ]]
+
+      -- add grid positions to the names
+      indexedGrid :: [((Int,Int), Char)]
       indexedGrid = concat $ zipWith zip unboundedGrid image
+
+      -- helper function
+      hasName :: ((Int,Int), Char) -> Bool
       hasName ((row,col), n) = n == name
+
+      -- get the locations for this particular name
+      pieceCoords :: [(Int,Int)]
       pieceCoords = fst <$> Prelude.filter hasName indexedGrid
-  in fromList . (Name name :) . fmap Location <$> positions squares pieceCoords
+
+      -- get the (many) representations of this particular piece
+      representations = positions squares pieceCoords
+
+      -- convert name and lists of locations to pieces.
+      pieces :: [Piece]
+      pieces = fromList . (Name name :) . fmap Location <$> representations
+
+  in pieces
 
 initialProgress :: [(Int, Int)] -> [[Char]] -> Progress Cell
 initialProgress squares image = 

@@ -29,7 +29,7 @@ main = do
                       $ solutions -- get the list of solutions
                       $ zeroProgress -- no progress yet
 
-  -- mapM_ print firstSolution
+  mapM_ print firstSolution
 
   let decorate piece = [ (loc,name) | loc <- getLocations piece, let name = getName piece ]
 
@@ -39,7 +39,7 @@ main = do
                       $ sort       -- Sort by location.
                       $ concat     -- gather all the named locations 
                       $ decorate <$> firstSolution -- Add names to locations
-  -- return ()
+  return ()
 
-  mapM_ print prettySolution
+  -- mapM_ print prettySolution
 
