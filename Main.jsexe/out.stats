@@ -5,10 +5,10 @@ DfpZFnZR7Sa7Y07uHwVn10:  10227
 KQpEOkJjX9qJTwsO87bqLg:  218130
 aeson_D4zMF1P1ZpsKMgz9HPiZU6:20876
 base:                    429404
-ghc-prim:                38856
+ghc-prim:                39576
 ghcjs_7HDZUYLWu6O9tXZr0Fsvpn:22043
 integer-gmp:             24088
-main:                    78030
+main:                    77046
 miso_CSCy35BTm867ouaMoBy3jV:94803
 scien_4m62Psf9729KUEAP4gkY8C:4872
 text_DfPPBlezQfj0WJcyB3QXey:1943
@@ -91,7 +91,7 @@ base
 
 ghc-prim
     GHC.CString:                        4537
-    GHC.Classes:                        32155
+    GHC.Classes:                        32875
     GHC.IntWord64:                      146
     GHC.Tuple:                          802
     GHC.Types:                          1216
@@ -112,9 +112,9 @@ integer-gmp
     GHC.Integer.Type:                   23755
 
 main
-    Init:                               12231
-    Main:                               42367
-    Piece:                              16345
+    Init:                               17175
+    Main:                               42518
+    Piece:                              10266
     Solve:                              7087
 
 miso_CSCy35BTm867ouaMoBy3jV
@@ -151,5 +151,5 @@ vecto_DY6msUvqg3iJ5Ak1gSL0h2
 
 
 
-packed metadata: 195843
+packed metadata: 196004
 
