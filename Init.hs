@@ -7,7 +7,7 @@ import Data.Set as DS
 import Piece
 import Solve
 
-type Board = Set Element
+type Board = Set Cell
 
 rotate :: [(Int,Int)] -> [(Int,Int)]
 rotate = fmap (\(row,col) -> (col, -row)) 
@@ -60,7 +60,7 @@ nameToPlacements squares image name =
       pieceCoords = fmap fst $ Prelude.filter hasName indexedGrid
   in fromList . (Name name :) . fmap Location <$> positions squares pieceCoords
 
-initialProgress :: [(Int, Int)] -> [[Char]] -> Progress Element
+initialProgress :: [(Int, Int)] -> [[Char]] -> Progress Cell
 initialProgress squares image = 
   let -- gather the names
       names = nub $ concat image

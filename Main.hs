@@ -29,8 +29,8 @@ data Action
 
 data Model = Model
   { time :: Double
-  , steps :: [Progress Element]
-  , solutions :: [Progress Element]
+  , steps :: [Progress Cell]
+  , solutions :: [Progress Cell]
   , rate :: Rate
   , stepRequested :: Bool
   } 
@@ -56,7 +56,7 @@ main = do
         ]
       board = [(row, col) | row <- [0 .. 11], col <- [0 .. 4]]
 
-      zeroProgress :: Progress Element
+      zeroProgress :: Progress Cell
       zeroProgress = initialProgress board pieces 
 
       allSteps = (Solve.steps) zeroProgress
@@ -98,7 +98,7 @@ updateModel (Time nTime) model@Model {..} = Effect newModel [(Time <$> now)]
              where 
                nSteps = tail steps
                currentStep = head nSteps
-               -- if no elements remain uncovered, we have a solution
+               -- if no cells remain uncovered, we have a solution
                -- so add it to the list of solutions.
                nSolutions =
                  if (DS.null $ uncovered currentStep)
@@ -117,11 +117,11 @@ viewModel :: Model -> View Action
 viewModel Model {..} =
   div_ []
     ( viewControls rate 
-    : viewProgress  workElementSize (head steps)
-    : fmap (viewProgress solutionElementSize) (reverse solutions))
+    : viewProgress  workCellSize (head steps)
+    : fmap (viewProgress solutionCellSize) (reverse solutions))
   where
-    workElementSize = 30
-    solutionElementSize = (workElementSize * 2) `div` 3
+    workCellSize = 30
+    solutionCellSize = (workCellSize * 2) `div` 3
 
 viewControls :: Rate -> View Action
 viewControls rate =
@@ -132,29 +132,29 @@ viewControls rate =
      ] ++ [button_ [onClick RequestStep] [text "Step"] | rate == Step]
     )
 
-viewProgress :: Int -> Progress Element -> View Action
-viewProgress elementSize (Progress used uncovered _) =
+viewProgress :: Int -> Progress Cell -> View Action
+viewProgress cellSize (Progress used uncovered _) =
   div_
     []
     [ MSV.svg_
         [ MSV.version_ "1.1"
-        , MSV.width_ (ms (w * elementSize))
-        , MSV.height_ (ms (h * elementSize))
+        , MSV.width_ (ms (w * cellSize))
+        , MSV.height_ (ms (h * cellSize))
         ]
-        (concatMap (showPiece elementSize) used)
+        (concatMap (showPiece cellSize) used)
     ]
   where
-    elements = DS.unions (uncovered : used)
-    ((rMin, cMin), (rMax, cMax)) = bounds $ getLocations elements
+    cells = DS.unions (uncovered : used)
+    ((rMin, cMin), (rMax, cMax)) = bounds $ getLocations cells
     w = 1 + cMax - cMin 
     h = 1 + rMax - rMin 
 
 showPiece :: Int -> Piece -> [View Action]
-showPiece elementSize p =
-  fmap (showElement elementSize (getColor p)) (getLocations p)
+showPiece cellSize p =
+  fmap (showCell cellSize (getColor p)) (getLocations p)
 
-showElement :: Int -> MisoString -> (Int, Int) -> View Action
-showElement elementSize color (row, col) =
+showCell :: Int -> MisoString -> (Int, Int) -> View Action
+showCell cellSize color (row, col) =
   MSV.g_
     [ MSV.transform_ $ scaleTransform `append` translateTransform
     ]
@@ -170,7 +170,7 @@ showElement elementSize color (row, col) =
         []
     ]
   where
-    scale = ms elementSize
+    scale = ms cellSize
     scaleTransform = "scale (" `append` scale `append` ", " `append` scale `append` ") " 
     translateTransform = "translate (" `append` ms col `append` ", " `append` ms row `append` ") "
 

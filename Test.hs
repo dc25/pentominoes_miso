@@ -18,7 +18,7 @@ main = do
         ]
       board = [(row, col) | row <- [0 .. 11], col <- [0 .. 4]]
 
-      zeroProgress :: Progress Element
+      zeroProgress :: Progress Cell
       zeroProgress = initialProgress board pieces 
 
   print $ "Piece count = " ++ show (length $ unused zeroProgress)

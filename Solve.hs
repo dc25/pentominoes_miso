@@ -15,17 +15,17 @@ next (Progress used uncovered unused) = do
 
   -- find the element with the least number of unused pieces containing it.
   let coverageCounts = DS.map (\el -> (length $ DS.filter (member el) unused, el)) uncovered
-      (minCount, minCountElement) = findMin coverageCounts
+      (minCount, minCountCell) = findMin coverageCounts
 
   guard (minCount > 0) -- nothing goes here; failed
 
   -- get each unused piece that covers this element
-  ns <- toList $ DS.filter (member $ minCountElement) unused
+  ns <- toList $ DS.filter (member $ minCountCell) unused
 
-  let -- remove the elements covered by this piece from the board
+  let -- remove the cells covered by this piece from the board
       newUncovered = uncovered \\ ns
 
-      -- remove the unused pieces that share a element with this piece
+      -- remove the unused pieces that share a cell with this piece
       newUnused = DS.filter (DS.null . intersection ns) unused
 
       -- add the piece to the solution being built up.
