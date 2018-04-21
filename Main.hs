@@ -15,14 +15,20 @@ import Piece
 import Init
 import Solve (steps, Progress(..))
 
+data Rate
+  = Fast
+  | Slow
+  deriving (Eq)
 
 data Action
-  = Time 
+  = Time Double
+  | SetRate Rate
   deriving (Eq)
 
 data Model = Model
-  { 
-    steps :: [Progress Cell]
+  { steps :: [Progress Cell]
+  , time :: Double
+  , rate :: Rate
   } 
 
 -- Model comparision using derived Eq runs the risk 
@@ -55,12 +61,14 @@ main = do
         Model
           { 
             steps = allSteps
+          , time = 0
+          , rate = Fast
           }
 
   startApp
     App
       { model = initialModel
-      , initialAction = Time 
+      , initialAction = Time t
       , update = updateModel
       , view = viewModel
       , events = defaultEvents
@@ -70,22 +78,40 @@ main = do
 
 updateModel :: Action -> Model -> Effect Action Model
 
-updateModel Time model@Model {..} = Effect newModel [return Time]
+updateModel (Time nTime) model@Model {..} = Effect newModel [Time <$> now]
   where
+    delta = nTime - time
+    (newSteps, newTime) = 
+        if      ((rate == Slow) && (delta < 400.0))
+        then (steps, time)
+        else (nSteps, nTime)
+             where 
+               nSteps = tail steps
+        
     newModel =
       model
-        { 
-          Main.steps = tail steps
+        { Main.steps = newSteps
+        , time = newTime 
         }
+
+updateModel (SetRate newRate) model = Effect (model {rate = newRate}) []
 
 viewModel :: Model -> View Action
 viewModel Model {..} =
   div_ []
-    ( 
-      [viewProgress  workCellSize (head steps)]
+    ( viewControls rate
+    : [viewProgress  workCellSize (head steps)]
     )
   where
     workCellSize = 30
+
+viewControls :: Rate -> View Action
+viewControls rate =
+  div_ []
+    ([ input_ [ type_ "radio" , name_ "updateRate" , checked_ (rate == Fast) , onClick (SetRate Fast) ] [] , text "Fast"
+     , input_ [ type_ "radio" , name_ "updateRate" , checked_ (rate == Slow) , onClick (SetRate Slow) ] [] , text "Slow"
+     ] 
+    )
 
 viewProgress :: Int -> Progress Cell -> View Action
 viewProgress cellSize (Progress used uncovered _) =
