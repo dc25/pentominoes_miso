@@ -13,7 +13,7 @@ import qualified Miso.Svg as MSV ( g_ , height_ , rect_ , svg_ , transform_ , ve
 
 import Piece
 import Init
-import Solve (steps, Progress(..))
+import Solve (stepsHylo, Progress(..))
 
 data Rate
   = Fast
@@ -59,7 +59,7 @@ main = do
       zeroProgress :: Progress Cell
       zeroProgress = initialProgress board pieces 
 
-      allSteps = Solve.steps zeroProgress
+      allSteps = Solve.stepsHylo zeroProgress
 
       initialModel =
         Model
@@ -120,7 +120,7 @@ viewModel Model {..} =
     : viewProgress  workCellSize (head steps)
     : fmap (viewProgress solutionCellSize) (reverse solutions))
   where
-    workCellSize = 30
+    workCellSize = 24
     solutionCellSize = (workCellSize * 2) `div` 3
 
 viewControls :: Rate -> View Action

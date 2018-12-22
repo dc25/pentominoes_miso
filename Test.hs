@@ -26,7 +26,7 @@ main = do
   let firstSolution :: [Piece]
       firstSolution =   used -- the pieces used for the first solution
                       $ head -- the first solution
-                      $ solutions -- get the list of solutions
+                      $ solutionsHylo -- get the list of solutions
                       $ zeroProgress -- no progress yet
 
   mapM_ print firstSolution

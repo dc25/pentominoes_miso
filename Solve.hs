@@ -1,8 +1,11 @@
-module Solve ( steps, solutions, Progress(..) ) where
+module Solve ( steps, stepsHylo, solutions, solutionsHylo, Progress(..) ) where
 
 import Control.Monad
 import Data.Set as DS 
 import Data.Tree
+import RecursionSchemes 
+import RTree
+
 
 data Progress a = Progress { used :: [Set a]  -- solution in progress
                            , uncovered :: Set a -- still to cover
@@ -33,6 +36,7 @@ next (Progress used uncovered unused) = do
 
   return $ Progress newUsed newUncovered newUnused
 
+-- Unfolding into a tree and then flatting into a list of steps
 steps :: Ord a => Progress a -> [Progress a]
 steps initial = 
   flatten $ unfoldTree (\p -> (p, next p)) initial
@@ -40,4 +44,11 @@ steps initial =
 solutions :: Ord a => Progress a -> [Progress a]
 solutions initial = 
   Prelude.filter (DS.null . uncovered ) $ steps initial
+
+stepsHylo :: Ord a => Progress a -> [Progress a]
+stepsHylo initial = hylo fromRTree (fromSeed next) initial
+
+solutionsHylo :: Ord a => Progress a -> [Progress a]
+solutionsHylo initial = 
+  Prelude.filter (DS.null . uncovered ) $ stepsHylo initial 
 

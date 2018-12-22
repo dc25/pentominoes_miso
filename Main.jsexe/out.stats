@@ -4,11 +4,11 @@ AHOOhHjGLItBYmDB2lAxxO:  826
 DfpZFnZR7Sa7Y07uHwVn10:  10227
 KQpEOkJjX9qJTwsO87bqLg:  209836
 aeson_D4zMF1P1ZpsKMgz9HPiZU6:20876
-base:                    429404
+base:                    429604
 ghc-prim:                39576
 ghcjs_7HDZUYLWu6O9tXZr0Fsvpn:22043
 integer-gmp:             24088
-main:                    75880
+main:                    79066
 miso_CSCy35BTm867ouaMoBy3jV:94803
 scien_4m62Psf9729KUEAP4gkY8C:4872
 text_DfPPBlezQfj0WJcyB3QXey:1943
@@ -51,7 +51,7 @@ base
     Foreign.Marshal.Array:              2038
     Foreign.Storable:                   2680
     GHC.Arr:                            3667
-    GHC.Base:                           15903
+    GHC.Base:                           16103
     GHC.Conc.Sync:                      7822
     GHC.Enum:                           10262
     GHC.Err:                            218
@@ -113,9 +113,11 @@ integer-gmp
 
 main
     Init:                               16030
-    Main:                               42512
+    Main:                               42516
     Piece:                              10251
-    Solve:                              7087
+    RTree:                              1369
+    RecursionSchemes:                   897
+    Solve:                              8003
 
 miso_CSCy35BTm867ouaMoBy3jV
     Miso:                               17457
@@ -151,5 +153,5 @@ vecto_DY6msUvqg3iJ5Ak1gSL0h2
 
 
 
-packed metadata: 194631
+packed metadata: 195754
 
